@@ -81,11 +81,47 @@
 				</svg>
 			</div>
 		</div>
-		<div class="w-full h-full flex-column">
-			<div class="h-[50px] bg-primary">
-
+		<div class="flex-1 flex flex-col">
+			<div class="h-[50px] bg-primary flex items-center">
+				<input
+					type="text"
+					class="flex-1 bg-primary text-secondary font-medium ml-4"
+					v-model="title"
+				/>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="20"
+					height="20"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					class="stroke-neutral ml-4 cursor-pointer"
+					fill="none"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+					<path
+						d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"
+					/>
+				</svg>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="20"
+					height="20"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					class="stroke-neutral mx-4 cursor-pointer"
+					fill="none"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+					<circle cx="12" cy="12" r="1" />
+					<circle cx="12" cy="19" r="1" />
+					<circle cx="12" cy="5" r="1" />
+				</svg>
 			</div>
-			<div class="h-full scroll-auto">
+			<div class="editor-container flex flex-col">
 				<editor />
 			</div>
 		</div>
@@ -94,14 +130,16 @@
 
 <script>
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
-import Editor from '../components/Editor.vue';
+import Editor from "../components/Editor.vue";
 export default {
 	name: "Home",
 	components: {
-		Editor
+		Editor,
 	},
 	data() {
-		
-	}
+		return {
+			title: "", //note title
+		};
+	},
 };
 </script>

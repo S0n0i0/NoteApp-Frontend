@@ -80,3 +80,9 @@
     }
     
 }
+
+@layer utilities {
+    .editor-container {
+        height: calc(100% - 50px);
+    }
+}
