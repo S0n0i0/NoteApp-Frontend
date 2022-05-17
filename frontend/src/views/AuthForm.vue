@@ -8,7 +8,7 @@
 				-translate-x-1/2 -translate-y-1/2
 				bg-primary
 				text-neutral
-				min-w-[250px]
+				min-w-[300px]
 				w-5/12
 				rounded-md
 				py-6
@@ -38,7 +38,26 @@
 						rounded-md
 					"
 				>
-					{{ method == "login" ? "login" : "registrati" }}
+					{{ method == "login" ? "Login" : "Registrati" }}
+				</button>
+				<button
+					class="flex bg-secondary rounded-full self-center mt-4 p-2"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="20"
+						height="20"
+						viewBox="0 0 24 24"
+						stroke-width="1.5"
+						class="stroke-neutral"
+						fill="none"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					>
+						<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+						<path d="M17.788 5.108a9 9 0 1 0 3.212 6.892h-8" />
+					</svg>
+					<p class="ml-1">Accedi con Google</p>
 				</button>
 				<p
 					class="self-center mt-8 cursor-pointer"
