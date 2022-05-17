@@ -81,11 +81,27 @@
 				</svg>
 			</div>
 		</div>
+		<div class="w-full h-full flex-column">
+			<div class="h-[50px] bg-primary">
+
+			</div>
+			<div class="h-full scroll-auto">
+				<editor />
+			</div>
+		</div>
 	</div>
 </template>
 
 <script>
+import "@vueup/vue-quill/dist/vue-quill.snow.css";
+import Editor from '../components/Editor.vue';
 export default {
 	name: "Home",
+	components: {
+		Editor
+	},
+	data() {
+		
+	}
 };
 </script>
