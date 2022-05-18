@@ -1,5 +1,6 @@
 <template>
 	<div class="flex h-full w-full">
+		<!-- start navbar -->
 		<div
 			class="
 				w-[50px]
@@ -17,10 +18,19 @@
 					height="25"
 					viewBox="0 0 24 24"
 					stroke-width="1.5"
-					class="stroke-quaternary cursor-pointer my-4"
+					class="
+						stroke-quaternary
+						cursor-pointer
+						my-4
+						hover:stroke-secondary
+					"
+					:class="{ 'stroke-secondary': activeBar == 'folders' }"
 					fill="none"
 					stroke-linecap="round"
 					stroke-linejoin="round"
+					@click="
+						activeBar = activeBar == 'folders' ? 'none' : 'folders'
+					"
 				>
 					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 					<path
@@ -81,7 +91,16 @@
 				</svg>
 			</div>
 		</div>
+		<!-- end navbar -->
+		<!-- start activebar -->
+		<div
+			class="h-full w-[100px] bg-secondary activebar touch-none"
+			v-show="activeBar != 'none'"
+		></div>
+		<!-- end activebar -->
+		<!-- start editor -->
 		<div class="flex-1 flex flex-col">
+			<!-- start titlebar -->
 			<div class="h-[50px] bg-primary flex items-center">
 				<input
 					type="text"
@@ -93,7 +112,7 @@
 					width="20"
 					height="20"
 					viewBox="0 0 24 24"
-					stroke-width="1.5"
+					stroke-width="2"
 					class="stroke-neutral ml-4 cursor-pointer"
 					fill="none"
 					stroke-linecap="round"
@@ -109,7 +128,7 @@
 					width="20"
 					height="20"
 					viewBox="0 0 24 24"
-					stroke-width="1.5"
+					stroke-width="2"
 					class="stroke-neutral mx-4 cursor-pointer"
 					fill="none"
 					stroke-linecap="round"
@@ -121,16 +140,20 @@
 					<circle cx="12" cy="5" r="1" />
 				</svg>
 			</div>
+			<!-- end titlebar -->
 			<div class="editor-container flex flex-col">
 				<editor />
 			</div>
 		</div>
+		<!-- end editor -->
 	</div>
 </template>
 
 <script>
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import Editor from "../components/Editor.vue";
+import interact from "interactjs";
+
 export default {
 	name: "Home",
 	components: {
@@ -139,7 +162,37 @@ export default {
 	data() {
 		return {
 			title: "", //note title
+			activeBar: "none", //none, folders, search, user, options
 		};
+	},
+	mounted() {
+		// initialize resizable activebar
+		interact(".activebar").resizable({
+			edges: {
+				right: true,
+			},
+			listeners: {
+				move: function (event) {
+					let { x, y } = event.target.dataset;
+					x = (parseFloat(x) || 0) + event.deltaRect.left;
+					y = (parseFloat(y) || 0) + event.deltaRect.top;
+
+					Object.assign(event.target.style, {
+						width: `${event.rect.width}px`,
+						height: `${event.rect.height}px`,
+						transform: `translate(${x}px, ${y}px)`,
+					});
+
+					Object.assign(event.target.dataset, { x, y });
+				},
+			},
+			modifiers: [
+				interact.modifiers.restrictSize({
+					min: { width: 200 },
+					max: { width: 400 },
+				}),
+			],
+		});
 	},
 };
 </script>
