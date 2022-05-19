@@ -19,7 +19,7 @@
 				{{ method == "login" ? "Login" : "Registrati" }}
 			</h1>
 			<form action="" class="flex flex-col py-2" @submit.prevent="submit">
-				<custom-input label="Username" name="username" type="text" />
+				<custom-input label="Email" name="email" type="text" />
 				<custom-input
 					label="Password"
 					name="password"
@@ -37,18 +37,28 @@
 						w-fit
 						rounded-md
 					"
+					:disabled="disableButton"
 				>
 					{{ method == "login" ? "Login" : "Registrati" }}
 				</button>
 				<button
-					class="flex bg-secondary rounded-full self-center mt-4 p-2"
+					class="
+						flex
+						bg-secondary
+						font-medium
+						rounded-full
+						self-center
+						mt-4
+						p-2
+					"
+					:disabled="disableButton"
 				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						width="20"
 						height="20"
 						viewBox="0 0 24 24"
-						stroke-width="1.5"
+						stroke-width="2"
 						class="stroke-neutral"
 						fill="none"
 						stroke-linecap="round"
@@ -178,6 +188,8 @@
 
 <script>
 import CustomInput from "@/components/CustomInput.vue";
+import http from "@/assets/scripts/axios-config";
+import { useAuthformStore } from "@/stores/authformStore";
 
 export default {
 	name: "AuthForm",
@@ -187,10 +199,27 @@ export default {
 	data() {
 		return {
 			method: "login", //login, registrazione
+			disableButton: false,
 		};
 	},
 	methods: {
 		submit() {
+			let store = useAuthformStore();
+			let [email, password] = [store.email, store.password];
+			console.log(process.env.API_BASE_URL);
+			if (!email.valid || !password.valid) return;
+			if (!email.value.length || !password.value.length) {
+				email.error = "L'email non può essere vuota";
+				password.error = "La password non può essere vuota";
+				email.valid = email.value.length;
+				password.valid = password.value.length;
+				return;
+			}
+			this.disableButton = true;
+			if (this.method == "login") {
+			} else {
+			}
+			this.disableButton = false;
 			this.$router.push({ name: "home" });
 		},
 	},

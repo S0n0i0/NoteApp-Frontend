@@ -2,7 +2,7 @@
 	<label :for="name" class="text-neutral mt-4">{{ label }}</label>
 	<div class="relative w-full h-fit mt-2">
 		<svg
-			v-if="name == 'username'"
+			v-if="name == 'email'"
 			xmlns="http://www.w3.org/2000/svg"
 			width="30"
 			height="30"
@@ -14,8 +14,8 @@
 			stroke-linejoin="round"
 		>
 			<path stroke="none" d="M0 0h24v24H0z" fill="none" />
-			<circle cx="12" cy="7" r="4" />
-			<path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+			<rect x="3" y="5" width="18" height="14" rx="2" />
+			<polyline points="3 7 12 13 21 7" />
 		</svg>
 		<svg
 			v-else
@@ -39,6 +39,8 @@
 			:type="type"
 			:id="name"
 			:name="name"
+			v-model="inputValue"
+			@blur="checkValidity"
 			class="
 				bg-tertiary
 				text-0x
@@ -52,15 +54,74 @@
 			"
 		/>
 	</div>
+	<p
+		class="text-quaternary text-1s mt-1 opacity-0 self-end"
+		:class="{ 'opacity-100': !store[name].valid }"
+	>
+		{{ store[name].error }}
+	</p>
 </template>
 
 <script>
+import { useAuthformStore } from "@/stores/authformStore";
+
 export default {
 	name: "CustomInput",
 	props: {
 		label: String,
 		name: String,
 		type: String,
+	},
+	data() {
+		return {
+			store: useAuthformStore(),
+			inputValue: "",
+		};
+	},
+	watch: {
+		inputValue(newValue, oldValue) {
+			let input = this.store[this.name];
+			input.valid = true;
+			input.value = this.inputValue;
+		},
+	},
+	methods: {
+		checkValidEmail() {
+			let email = this.store.email;
+			if (!this.inputValue.length) {
+				email.valid = false;
+				email.error = "L'email non può essere vuota";
+			} else if (
+				!/\s*(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))\s*/.test(
+					this.inputValue
+				)
+			) {
+				email.valid = false;
+				email.error = "Email non valida";
+			}
+		},
+		checkValidPassword() {
+			let password = this.store.password;
+			if (!this.inputValue.length) {
+				password.valid = false;
+				password.error = "La password non può essere vuota";
+			} else if (this.inputValue.length < 8) {
+				password.valid = false;
+				password.error = "Inserisci almeno 8 caratteri";
+			}
+		},
+		checkValidity() {
+			switch (this.name) {
+				case "email":
+					this.checkValidEmail();
+					break;
+				case "password":
+					this.checkValidPassword();
+					break;
+				default:
+					break;
+			}
+		},
 	},
 };
 </script>
