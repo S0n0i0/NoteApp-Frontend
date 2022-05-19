@@ -189,7 +189,9 @@
 <script>
 import CustomInput from "@/components/CustomInput.vue";
 import http from "@/assets/scripts/axios-config";
+import { API_LOGIN_URL, API_REGISTER_URL } from "config";
 import { useAuthformStore } from "@/stores/authformStore";
+import { useUserStore } from "@/stores/userStore";
 
 export default {
 	name: "AuthForm",
@@ -203,8 +205,9 @@ export default {
 		};
 	},
 	methods: {
-		submit() {
+		async submit() {
 			let store = useAuthformStore();
+			let user = useUserStore();
 			let [email, password] = [store.email, store.password];
 			console.log(process.env.API_BASE_URL);
 			if (!email.valid || !password.valid) return;
@@ -216,9 +219,25 @@ export default {
 				return;
 			}
 			this.disableButton = true;
-			if (this.method == "login") {
-			} else {
+			let response;
+			try {
+				if (this.method == "login") {
+					response = await http.post(API_LOGIN_URL, {
+						email: email.value,
+						password: password.value,
+					});
+				} else {
+					response = await http.post(API_REGISTER_URL, {
+						email: email.value,
+						password: password.value,
+					});
+				}
+			} catch (error) {
+				console.log(error);
+				this.disableButton = false;
+				return;
 			}
+			user.authToken = response.data.token;
 			this.disableButton = false;
 			this.$router.push({ name: "home" });
 		},
