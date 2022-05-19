@@ -105,8 +105,33 @@
 				<input
 					type="text"
 					class="flex-1 bg-primary text-secondary font-medium ml-4"
-					v-model="title"
+					v-model="note.title"
 				/>
+				<div class="flex">
+					<label class="text-neutral text-1s mt-1">Salvataggio automatico</label>
+					<label class="switch mt-1 ml-2">
+						<input type="checkbox" @click="editor.autoSaving = !editor.autoSaving" >
+						<span class="slider round"></span>
+					</label>
+				</div>
+				<svg 
+					xmlns="http://www.w3.org/2000/svg"
+					class="icon icon-tabler icon-tabler-device-floppy stroke-neutral ml-4 cursor-pointer"
+					width="20"
+					height="20"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					stroke="#ffffff"
+					fill="none"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					@click="save"
+				>
+					<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+					<path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+					<circle cx="12" cy="14" r="2" />
+					<polyline points="14 4 14 8 8 8 8 4" />
+				</svg>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					width="20"
@@ -142,7 +167,7 @@
 			</div>
 			<!-- end titlebar -->
 			<div class="editor-container flex flex-col">
-				<editor />
+				<editor ref="editor" @autoSave="save" :contentType="editor.contentType" :content="editor.content" :readOnly="editor.readOnly" :autoSaving="editor.autoSaving" :options="editor.options" />
 			</div>
 		</div>
 		<!-- end editor -->
@@ -150,9 +175,12 @@
 </template>
 
 <script>
+import http from "../assets/scripts/axios-config";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import Editor from "../components/Editor.vue";
 import interact from "interactjs";
+import { Delta } from "@vueup/vue-quill";
+import { API_SAVE_URL,API_LOAD_URL } from "../../config";
 
 export default {
 	name: "Home",
@@ -161,8 +189,20 @@ export default {
 	},
 	data() {
 		return {
-			title: "", //note title
+			note: { //note data
+				id: 1,
+				title: ""
+			},
 			activeBar: "none", //none, folders, search, user, options
+			editor: { //Editor data
+				contentType: "delta",
+				content: {},
+				readOnly: false,
+				autoSaving: false,
+				options: {
+					bounds: document.getElementById("editorContainer")
+				}
+			}
 		};
 	},
 	mounted() {
@@ -194,5 +234,122 @@ export default {
 			],
 		});
 	},
+	methods: {
+		save(changes) { //Send a save request to the database to save the note
+			if (!(changes instanceof Delta)) {
+				changes = this.$refs.editor.getChanges()
+				this.$refs.editor.deleteChanges()
+				console.log("Salvato");
+			} else {
+				console.log("Salvato automaticamente");
+			}
+			http.post(API_SAVE_URL + "/" + this.note.id,{
+					title: this.note.title,
+					content: changes
+				})
+				.then((response) => {
+					console.log("File salvato");
+				})
+				.catch((err) => {
+					console.log(err);
+					if (err.status == 400) {
+						console.error("Input invalido");
+					} else if (err.status == 403) {
+						console.error("Utente non autenticato");
+						this.$router.push('/login')
+					} else if (err.status == 500) {
+						console.error("Errore del server");
+					} else {
+						console.error("Errore generico: ",err.response.status,"-",err.code);
+					}
+					console.error("File non salvato");
+				})
+		},
+		load(id) {
+			http.get(API_LOAD_URL + "/" + this.note.id)
+				.then((res) => {
+					this.note.title = res.response.data.title
+					this.$refs.editor.setContents(response.data.content)
+					//Aggiungere created e update
+					console.log("File caricato");
+				})
+				.catch((err) => {
+					if (err.status == 400) {
+						console.error("Input invalido");
+					} else if (err.status == 403) {
+						console.error("Utente non autenticato");
+						this.$router.push('/login')
+					} else if (err.status == 500) {
+						console.error("Errore del server");
+					} else {
+						console.error("Errore generico: ",err.response.status,"-",err.code);
+					}
+					console.error("File non caricato");
+				})
+		}
+	}
 };
 </script>
+
+<style>
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 16px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 13px;
+  width: 13px;
+  left: 2px;
+  bottom: 1px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(18px);
+  -ms-transform: translateX(18px);
+  transform: translateX(18px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+</style>
