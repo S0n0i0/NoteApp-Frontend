@@ -189,7 +189,7 @@
 <script>
 import CustomInput from "@/components/CustomInput.vue";
 import http from "@/assets/scripts/axios-config";
-import { API_LOGIN_URL, API_REGISTER_URL } from "config";
+import { API_LOGIN_URL, API_REGISTER_URL } from "../../config";
 import { useAuthformStore } from "@/stores/authformStore";
 import { useUserStore } from "@/stores/userStore";
 
@@ -209,7 +209,6 @@ export default {
 			let store = useAuthformStore();
 			let user = useUserStore();
 			let [email, password] = [store.email, store.password];
-			console.log(process.env.API_BASE_URL);
 			if (!email.valid || !password.valid) return;
 			if (!email.value.length || !password.value.length) {
 				email.error = "L'email non può essere vuota";

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useUserStore } from "@/stores/userStore";
-import { API_BASE_URL } from 'config';
+import { API_BASE_URL } from '../../../config';
 
 let http = axios.create({
     baseURL: API_BASE_URL,
