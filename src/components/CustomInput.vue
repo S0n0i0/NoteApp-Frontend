@@ -18,6 +18,22 @@
 			<polyline points="3 7 12 13 21 7" />
 		</svg>
 		<svg
+			v-else-if="name == 'username'"
+			xmlns="http://www.w3.org/2000/svg"
+			width="30"
+			height="30"
+			viewBox="0 0 24 24"
+			stroke-width="1"
+			class="stroke-secondary absolute top-1/2 left-1 -translate-y-1/2"
+			fill="none"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+		>
+			<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+			<circle cx="12" cy="7" r="4" />
+			<path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+		</svg>
+		<svg
 			v-else
 			xmlns="http://www.w3.org/2000/svg"
 			width="30"
@@ -110,6 +126,13 @@ export default {
 				password.error = "Inserisci almeno 8 caratteri";
 			}
 		},
+		checkValidUsername() {
+			let username = this.store.username;
+			if (!this.inputValue.length) {
+				username.valid = false;
+				username.error = "L'username non può essere vuoto";
+			}
+		},
 		checkValidity() {
 			switch (this.name) {
 				case "email":
@@ -117,6 +140,9 @@ export default {
 					break;
 				case "password":
 					this.checkValidPassword();
+					break;
+				case "username":
+					this.checkValidUsername();
 					break;
 				default:
 					break;

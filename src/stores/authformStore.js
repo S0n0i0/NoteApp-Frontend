@@ -13,6 +13,11 @@ export const useAuthformStore = defineStore('authform', {
                 valid: true,
                 error: 'errore'
             },
+            username: {
+                value: '',
+                valid: true,
+                error: 'errore'
+            },
         };
     },
 });

@@ -1,4 +1,9 @@
 <template>
+	<custom-dialog
+		:open="openDialog"
+		:error="dialogError"
+		@close="closeDialog"
+	/>
 	<div class="w-full h-full">
 		<div
 			class="
@@ -20,6 +25,14 @@
 			</h1>
 			<form action="" class="flex flex-col py-2" @submit.prevent="submit">
 				<custom-input label="Email" name="email" type="text" />
+				<keep-alive>
+					<custom-input
+						v-if="method == 'register'"
+						label="Username"
+						name="username"
+						type="text"
+					/>
+				</keep-alive>
 				<custom-input
 					label="Password"
 					name="password"
@@ -41,39 +54,39 @@
 				>
 					{{ method == "login" ? "Login" : "Registrati" }}
 				</button>
-				<button
-					class="
-						flex
-						bg-secondary
-						font-medium
-						rounded-full
-						self-center
-						mt-4
-						p-2
-					"
-					:disabled="disableButton"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="20"
-						height="20"
-						viewBox="0 0 24 24"
-						stroke-width="2"
-						class="stroke-neutral"
-						fill="none"
-						stroke-linecap="round"
-						stroke-linejoin="round"
+				<a :href="googleLink" class="self-center mt-4">
+					<button
+						type="button"
+						class="
+							flex
+							bg-secondary
+							font-medium
+							rounded-full
+							p-2
+							items-center
+						"
+						:disabled="disableButton"
 					>
-						<path stroke="none" d="M0 0h24v24H0z" fill="none" />
-						<path d="M17.788 5.108a9 9 0 1 0 3.212 6.892h-8" />
-					</svg>
-					<p class="ml-1">Accedi con Google</p>
-				</button>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="20"
+							height="20"
+							viewBox="0 0 24 24"
+							stroke-width="2"
+							class="stroke-neutral"
+							fill="none"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+							<path d="M17.788 5.108a9 9 0 1 0 3.212 6.892h-8" />
+						</svg>
+						<p class="ml-1">Accedi con Google</p>
+					</button>
+				</a>
 				<p
 					class="self-center mt-8 cursor-pointer"
-					@click="
-						method = method == 'login' ? 'registrazione' : 'login'
-					"
+					@click="method = method == 'login' ? 'register' : 'login'"
 				>
 					{{
 						method == "login"
@@ -188,8 +201,14 @@
 
 <script>
 import CustomInput from "@/components/CustomInput.vue";
+import CustomDialog from "@/components/CustomDialog.vue";
 import http from "@/assets/scripts/axios-config";
-import { API_LOGIN_URL, API_REGISTER_URL } from "../../config";
+import {
+	API_LOGIN_URL,
+	API_REGISTER_URL,
+	API_GOOGLE_URL,
+	API_BASE_URL,
+} from "../../config";
 import { useAuthformStore } from "@/stores/authformStore";
 import { useUserStore } from "@/stores/userStore";
 
@@ -197,24 +216,40 @@ export default {
 	name: "AuthForm",
 	components: {
 		CustomInput,
+		CustomDialog,
 	},
 	data() {
 		return {
-			method: "login", //login, registrazione
+			method: "login", //login, register
 			disableButton: false,
+			openDialog: false,
+			dialogError: "Errore",
+			googleLink: API_BASE_URL + API_GOOGLE_URL,
 		};
 	},
 	methods: {
 		async submit() {
 			let store = useAuthformStore();
 			let user = useUserStore();
-			let [email, password] = [store.email, store.password];
+			let [email, password, username] = [
+				store.email,
+				store.password,
+				store.username,
+			];
 			if (!email.valid || !password.valid) return;
-			if (!email.value.length || !password.value.length) {
+			if (this.method == "register" && !username.valid) return;
+			if (
+				!email.value.length ||
+				!password.value.length ||
+				(!username.value.length && this.method == "register")
+			) {
 				email.error = "L'email non può essere vuota";
 				password.error = "La password non può essere vuota";
 				email.valid = email.value.length;
 				password.valid = password.value.length;
+				username.error = "L'username non può essere vuoto";
+				username.valid =
+					this.method == "register" ? username.value.length : true;
 				return;
 			}
 			this.disableButton = true;
@@ -229,16 +264,25 @@ export default {
 					response = await http.post(API_REGISTER_URL, {
 						email: email.value,
 						password: password.value,
+						name: username.value,
 					});
 				}
 			} catch (error) {
-				console.log(error);
-				this.disableButton = false;
+				this.openDialog = true;
+				if (error?.response?.status == 400) {
+					this.dialogError = "Email o password errata";
+				} else {
+					this.dialogError = "Si è verificato un errore";
+				}
 				return;
 			}
 			user.authToken = response.data.token;
 			this.disableButton = false;
 			this.$router.push({ name: "home" });
+		},
+		closeDialog() {
+			this.openDialog = false;
+			this.disableButton = false;
 		},
 	},
 };
