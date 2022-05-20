@@ -110,7 +110,7 @@
 				<div class="flex">
 					<label class="text-neutral text-1s mt-1">Salvataggio automatico</label>
 					<label class="switch mt-1 ml-2">
-						<input type="checkbox" @click="editor.autoSaving = !editor.autoSaving" >
+						<input v-model="editor.autoSaving" type="checkbox" @click="editor.autoSaving = !editor.autoSaving" >
 						<span class="slider round"></span>
 					</label>
 				</div>
@@ -169,6 +169,7 @@
 			<div class="editor-container flex flex-col">
 				<editor ref="editor" @autoSave="save" :contentType="editor.contentType" :content="editor.content" :readOnly="editor.readOnly" :autoSaving="editor.autoSaving" :options="editor.options" />
 			</div>
+			<custom-dialog @close="error.show = false" :open="error.show" :error="error.description" />
 		</div>
 		<!-- end editor -->
 	</div>
@@ -178,6 +179,7 @@
 import http from "../assets/scripts/axios-config";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import Editor from "../components/Editor.vue";
+import CustomDialog from '../components/CustomDialog.vue';
 import interact from "interactjs";
 import { Delta } from "@vueup/vue-quill";
 import { API_SAVE_URL,API_LOAD_URL } from "../../config";
@@ -186,14 +188,20 @@ export default {
 	name: "Home",
 	components: {
 		Editor,
+CustomDialog,
 	},
 	data() {
 		return {
+			tempToken: "",
 			note: { //note data
-				id: 1,
-				title: ""
+				id: "6287cc95d93ec8fb38fe19d1",
+				description: ""
 			},
 			activeBar: "none", //none, folders, search, user, options
+			error: {
+				show: false,
+				description: ""
+			},
 			editor: { //Editor data
 				contentType: "delta",
 				content: {},
@@ -235,23 +243,30 @@ export default {
 		});
 	},
 	methods: {
+		showError(description) {
+			this.error.description = description
+			this.error.show = true
+			this.editor.autoSaving = false
+		},
 		save(changes) { //Send a save request to the database to save the note
 			if (!(changes instanceof Delta)) {
 				changes = this.$refs.editor.getChanges()
 				this.$refs.editor.deleteChanges()
-				console.log("Salvato");
+				console.log("Salvataggio manuale");
 			} else {
-				console.log("Salvato automaticamente");
+				console.log("Salvataggio automatico");
 			}
-			http.post(API_SAVE_URL + "/" + this.note.id,{
+			http.put(API_SAVE_URL + "/" + this.note.id,{
 					title: this.note.title,
-					content: changes
-				})
+					ops: changes.ops
+				},{
+					headers: {
+					"Authorization": "Bearer "+this.tempToken
+				}})
 				.then((response) => {
 					console.log("File salvato");
 				})
 				.catch((err) => {
-					console.log(err);
 					if (err.status == 400) {
 						console.error("Input invalido");
 					} else if (err.status == 403) {
@@ -260,16 +275,20 @@ export default {
 					} else if (err.status == 500) {
 						console.error("Errore del server");
 					} else {
-						console.error("Errore generico: ",err.response.status,"-",err.code);
+						console.error("Errore generico: ",err.status,"-",err.code);
 					}
+					this.showError("Errore: File non salvato")
 					console.error("File non salvato");
 				})
 		},
 		load(id) {
-			http.get(API_LOAD_URL + "/" + this.note.id)
+			http.get(API_LOAD_URL + "/" + this.note.id,{
+					headers: {
+						"Authorization": "Bearer "+this.tempToken
+				}})
 				.then((res) => {
-					this.note.title = res.response.data.title
-					this.$refs.editor.setContents(response.data.content)
+					this.note.title = res.data.name
+					this.$refs.editor.setContents(JSON.parse(res.data.content))
 					//Aggiungere created e update
 					console.log("File caricato");
 				})
@@ -282,8 +301,9 @@ export default {
 					} else if (err.status == 500) {
 						console.error("Errore del server");
 					} else {
-						console.error("Errore generico: ",err.response.status,"-",err.code);
+						console.error("Errore generico: ",err.status,"-",err.code);
 					}
+					this.showError("Errore: File non caricato")
 					console.error("File non caricato");
 				})
 		}
