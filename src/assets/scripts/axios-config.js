@@ -9,8 +9,6 @@ let http = axios.create({
     }
 });
 
-
-
 http.interceptors.request.use(function (config) {
     config.headers.Authorization = useUserStore().authToken;
     return config;

@@ -1,7 +1,6 @@
 module.exports = {
   content: ['./public/**/*.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   darkMode: false,
-  important: true,
   theme: {
     colors: {
       transparent: 'transparent',
