@@ -2,7 +2,7 @@
 	<custom-dialog
 		:open="openDialog"
 		:error="dialogError"
-		@close="closeDialog"
+		@close="openDialog = false"
 	/>
 	<div class="w-full h-full">
 		<div
@@ -274,15 +274,12 @@ export default {
 				} else {
 					this.dialogError = "Si è verificato un errore";
 				}
+				this.disableButton = false;
 				return;
 			}
 			user.authToken = response.data.token;
 			this.disableButton = false;
 			this.$router.push({ name: "home" });
-		},
-		closeDialog() {
-			this.openDialog = false;
-			this.disableButton = false;
 		},
 	},
 };

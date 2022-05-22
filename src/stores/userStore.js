@@ -6,4 +6,5 @@ export const useUserStore = defineStore('user', {
             authToken: ''
         };
     },
+    persist: true,
 });

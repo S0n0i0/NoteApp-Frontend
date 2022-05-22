@@ -1,196 +1,203 @@
 <template>
-  <div class="flex h-full w-full">
-    <!-- start navbar -->
-    <div
-      class="
-        w-[50px]
-        h-full
-        flex flex-col
-        bg-primary
-        items-center
-        justify-between
-      "
-    >
-      <div class="flex flex-col">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="25"
-          height="25"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          class="stroke-quaternary cursor-pointer my-4 hover:stroke-secondary"
-          :class="{ 'stroke-secondary': activeBar == 'folders' }"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          @click="activeBar = activeBar == 'folders' ? 'none' : 'folders'"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path
-            d="M9 4h3l2 2h5a2 2 0 0 1 2 2v7a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"
-          />
-          <path
-            d="M17 17v2a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2h2"
-          />
-        </svg>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="25"
-          height="25"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          class="stroke-quaternary cursor-pointer my-4"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <circle cx="10" cy="10" r="7" />
-          <line x1="21" y1="21" x2="15" y2="15" />
-        </svg>
-      </div>
-      <div class="flex flex-col">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="25"
-          height="25"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          class="stroke-quaternary cursor-pointer my-4"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <circle cx="12" cy="7" r="4" />
-          <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
-        </svg>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="25"
-          height="25"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          class="stroke-quaternary cursor-pointer my-4"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path
-            d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"
-          />
-          <circle cx="12" cy="12" r="3" />
-        </svg>
-      </div>
-    </div>
-    <!-- end navbar -->
-    <!-- start activebar -->
-    <div
-      class="h-full w-[100px] bg-secondary activebar touch-none"
-      v-show="activeBar != 'none'"
-    ></div>
-    <!-- end activebar -->
-    <!-- start editor -->
-    <div class="flex-1 flex flex-col">
-      <!-- start titlebar -->
-      <div class="h-[50px] bg-primary flex items-center">
-        <input
-          type="text"
-          class="flex-1 bg-primary text-secondary font-medium ml-4"
-          v-model="note.title"
-        />
-        <div class="flex">
-          <label class="text-neutral text-1s mt-1"
-            >Salvataggio automatico</label
-          >
-          <label class="switch mt-1 ml-2">
-            <input
-              v-model="editor.autoSaving"
-              type="checkbox"
-              @click="editor.autoSaving = !editor.autoSaving"
-            />
-            <span class="slider round"></span>
-          </label>
-        </div>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="
-            icon icon-tabler icon-tabler-device-floppy
-            stroke-neutral
-            ml-4
-            cursor-pointer
-          "
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="#ffffff"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          @click="save"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path
-            d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2"
-          />
-          <circle cx="12" cy="14" r="2" />
-          <polyline points="14 4 14 8 8 8 8 4" />
-        </svg>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          class="stroke-neutral ml-4 cursor-pointer"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path
-            d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"
-          />
-        </svg>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          class="stroke-neutral mx-4 cursor-pointer"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <circle cx="12" cy="12" r="1" />
-          <circle cx="12" cy="19" r="1" />
-          <circle cx="12" cy="5" r="1" />
-        </svg>
-      </div>
-      <!-- end titlebar -->
-      <div class="editor-container flex flex-col">
-        <editor
-          ref="editor"
-          @autoSave="save"
-          :contentType="editor.contentType"
-          :content="editor.content"
-          :readOnly="editor.readOnly"
-          :autoSaving="editor.autoSaving"
-          :options="editor.options"
-        />
-      </div>
-      <custom-dialog
-        @close="error.show = false"
-        :open="error.show"
-        :error="error.description"
-      />
-    </div>
-    <!-- end editor -->
-  </div>
+	<div class="flex h-full w-full">
+		<!-- start navbar -->
+		<div
+			class="
+				w-[50px]
+				h-full
+				flex flex-col
+				bg-primary
+				items-center
+				justify-between
+			"
+		>
+			<div class="flex flex-col">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="25"
+					height="25"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					class="
+						stroke-quaternary
+						cursor-pointer
+						my-4
+						hover:stroke-secondary
+					"
+					:class="{ 'stroke-secondary': activeBar == 'folders' }"
+					fill="none"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					@click="
+						activeBar = activeBar == 'folders' ? 'none' : 'folders'
+					"
+				>
+					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+					<path
+						d="M9 4h3l2 2h5a2 2 0 0 1 2 2v7a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"
+					/>
+					<path
+						d="M17 17v2a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2h2"
+					/>
+				</svg>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="25"
+					height="25"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					class="stroke-quaternary cursor-pointer my-4"
+					fill="none"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+					<circle cx="10" cy="10" r="7" />
+					<line x1="21" y1="21" x2="15" y2="15" />
+				</svg>
+			</div>
+			<div class="flex flex-col">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="25"
+					height="25"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					class="stroke-quaternary cursor-pointer my-4"
+					fill="none"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+					<circle cx="12" cy="7" r="4" />
+					<path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+				</svg>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="25"
+					height="25"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					class="stroke-quaternary cursor-pointer my-4"
+					fill="none"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+					<path
+						d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"
+					/>
+					<circle cx="12" cy="12" r="3" />
+				</svg>
+			</div>
+		</div>
+		<!-- end navbar -->
+		<!-- start activebar -->
+		<div
+			class="h-full w-[100px] bg-secondary activebar touch-none"
+			v-show="activeBar != 'none'"
+		></div>
+		<!-- end activebar -->
+		<!-- start editor -->
+		<div class="flex-1 flex flex-col">
+			<!-- start titlebar -->
+			<div class="h-[50px] bg-primary flex items-center">
+				<input
+					type="text"
+					class="flex-1 bg-primary text-secondary font-medium ml-4"
+					v-model="note.title"
+				/>
+				<div class="flex">
+					<label class="text-neutral text-1s mt-1"
+						>Salvataggio automatico</label
+					>
+					<label class="switch mt-1 ml-2">
+						<input
+							v-model="editor.autoSaving"
+							type="checkbox"
+							@click="editor.autoSaving = !editor.autoSaving"
+						/>
+						<span class="slider round"></span>
+					</label>
+				</div>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="
+						icon icon-tabler icon-tabler-device-floppy
+						stroke-neutral
+						ml-4
+						cursor-pointer
+					"
+					width="20"
+					height="20"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					stroke="#ffffff"
+					fill="none"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					@click="save"
+				>
+					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+					<path
+						d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2"
+					/>
+					<circle cx="12" cy="14" r="2" />
+					<polyline points="14 4 14 8 8 8 8 4" />
+				</svg>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="20"
+					height="20"
+					viewBox="0 0 24 24"
+					stroke-width="2"
+					class="stroke-neutral ml-4 cursor-pointer"
+					fill="none"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+					<path
+						d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"
+					/>
+				</svg>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="20"
+					height="20"
+					viewBox="0 0 24 24"
+					stroke-width="2"
+					class="stroke-neutral mx-4 cursor-pointer"
+					fill="none"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+					<circle cx="12" cy="12" r="1" />
+					<circle cx="12" cy="19" r="1" />
+					<circle cx="12" cy="5" r="1" />
+				</svg>
+			</div>
+			<!-- end titlebar -->
+			<div class="editor-container flex flex-col">
+				<editor
+					ref="editor"
+					@autoSave="save"
+					:contentType="editor.contentType"
+					:content="editor.content"
+					:readOnly="editor.readOnly"
+					:autoSaving="editor.autoSaving"
+					:options="editor.options"
+				/>
+			</div>
+			<custom-dialog
+				@close="error.show = false"
+				:open="error.show"
+				:error="error.description"
+			/>
+		</div>
+		<!-- end editor -->
+	</div>
 </template>
 
 <script>
@@ -203,202 +210,197 @@ import { Delta } from "@vueup/vue-quill";
 import { API_SAVE_URL, API_LOAD_URL } from "../../config";
 
 export default {
-  name: "Home",
-  components: {
-    Editor,
-    CustomDialog,
-  },
-  data() {
-    return {
-      tempToken: "",
-      note: {
-        //note data
-        id: "6287cc95d93ec8fb38fe19d1",
-        description: "",
-      },
-      activeBar: "none", //none, folders, search, user, options
-      error: {
-        show: false,
-        description: "",
-      },
-      editor: {
-        //Editor data
-        contentType: "delta",
-        content: {},
-        readOnly: false,
-        autoSaving: false,
-        options: {
-          bounds: document.getElementById("editorContainer"),
-        },
-      },
-    };
-  },
-  mounted() {
-    // initialize resizable activebar
-    interact(".activebar").resizable({
-      edges: {
-        right: true,
-      },
-      listeners: {
-        move: function (event) {
-          let { x, y } = event.target.dataset;
-          x = (parseFloat(x) || 0) + event.deltaRect.left;
-          y = (parseFloat(y) || 0) + event.deltaRect.top;
+	name: "Home",
+	components: {
+		Editor,
+		CustomDialog,
+	},
+	data() {
+		return {
+			note: {
+				//note data
+				id: "6287cc95d93ec8fb38fe19d1",
+				description: "",
+			},
+			activeBar: "none", //none, folders, search, user, options
+			error: {
+				show: false,
+				description: "",
+			},
+			editor: {
+				//Editor data
+				contentType: "delta",
+				content: {},
+				readOnly: false,
+				autoSaving: false,
+				options: {
+					bounds: document.getElementById("editorContainer"),
+				},
+			},
+		};
+	},
+	mounted() {
+		// initialize resizable activebar
+		interact(".activebar").resizable({
+			edges: {
+				right: true,
+			},
+			listeners: {
+				move: function (event) {
+					let { x, y } = event.target.dataset;
+					x = (parseFloat(x) || 0) + event.deltaRect.left;
+					y = (parseFloat(y) || 0) + event.deltaRect.top;
 
-          Object.assign(event.target.style, {
-            width: `${event.rect.width}px`,
-            height: `${event.rect.height}px`,
-            transform: `translate(${x}px, ${y}px)`,
-          });
+					Object.assign(event.target.style, {
+						width: `${event.rect.width}px`,
+						height: `${event.rect.height}px`,
+						transform: `translate(${x}px, ${y}px)`,
+					});
 
-          Object.assign(event.target.dataset, { x, y });
-        },
-      },
-      modifiers: [
-        interact.modifiers.restrictSize({
-          min: { width: 200 },
-          max: { width: 400 },
-        }),
-      ],
-    });
-  },
-  methods: {
-    showError(description) {
-      this.error.description = description;
-      this.error.show = true;
-      this.editor.autoSaving = false;
-    },
-    save(changes) {
-      //Send a save request to the database to save the note
-      if (!(changes instanceof Delta)) {
-        changes = this.$refs.editor.getChanges();
-        this.$refs.editor.deleteChanges();
-        console.log("Salvataggio manuale");
-      } else {
-        console.log("Salvataggio automatico");
-      }
-      http
-        .put(
-          API_SAVE_URL + "/" + this.note.id,
-          {
-            title: this.note.title,
-            ops: changes.ops,
-          },
-          {
-            headers: {
-              Authorization: "Bearer " + this.tempToken,
-            },
-          }
-        )
-        .then((response) => {
-          console.log("File salvato");
-        })
-        .catch((err) => {
-          if (err.status == 400) {
-            console.error("Input invalido");
-          } else if (err.status == 403) {
-            console.error("Utente non autenticato");
-            this.$router.push("/login");
-          } else if (err.status == 500) {
-            console.error("Errore del server");
-          } else {
-            console.error("Errore generico: ", err.status, "-", err.code);
-          }
-          this.showError("Errore: File non salvato");
-          console.error("File non salvato");
-        });
-    },
-    load(id) {
-      http
-        .get(API_LOAD_URL + "/" + this.note.id, {
-          headers: {
-            Authorization: "Bearer " + this.tempToken,
-          },
-        })
-        .then((res) => {
-          this.note.title = res.data.name;
-          this.$refs.editor.setContents(JSON.parse(res.data.content));
-          //Aggiungere created e update
-          console.log("File caricato");
-        })
-        .catch((err) => {
-          if (err.status == 400) {
-            console.error("Input invalido");
-          } else if (err.status == 403) {
-            console.error("Utente non autenticato");
-            this.$router.push("/login");
-          } else if (err.status == 500) {
-            console.error("Errore del server");
-          } else {
-            console.error("Errore generico: ", err.status, "-", err.code);
-          }
-          this.showError("Errore: File non caricato");
-          console.error("File non caricato");
-        });
-    },
-  },
+					Object.assign(event.target.dataset, { x, y });
+				},
+			},
+			modifiers: [
+				interact.modifiers.restrictSize({
+					min: { width: 200 },
+					max: { width: 400 },
+				}),
+			],
+		});
+	},
+	methods: {
+		showError(description) {
+			this.error.description = description;
+			this.error.show = true;
+			this.editor.autoSaving = false;
+		},
+		save(changes) {
+			//Send a save request to the database to save the note
+			if (!(changes instanceof Delta)) {
+				changes = this.$refs.editor.getChanges();
+				this.$refs.editor.deleteChanges();
+				console.log("Salvataggio manuale");
+			} else {
+				console.log("Salvataggio automatico");
+			}
+			http.put(API_SAVE_URL + "/" + this.note.id, {
+				title: this.note.title,
+				ops: changes.ops,
+			})
+				.then((response) => {
+					console.log("File salvato");
+				})
+				.catch((err) => {
+					if (err.status == 400) {
+						console.error("Input invalido");
+					} else if (err.status == 403) {
+						console.error("Utente non autenticato");
+						this.$router.push("/login");
+					} else if (err.status == 500) {
+						console.error("Errore del server");
+					} else {
+						console.error(
+							"Errore generico: ",
+							err.status,
+							"-",
+							err.code
+						);
+					}
+					this.showError("Errore: File non salvato");
+					console.error("File non salvato");
+				});
+		},
+		load(id) {
+			http.get(API_LOAD_URL + "/" + this.note.id)
+				.then((res) => {
+					this.note.title = res.data.name;
+					this.$refs.editor.setContents(JSON.parse(res.data.content));
+					//Aggiungere created e update
+					console.log("File caricato");
+				})
+				.catch((err) => {
+					if (err.status == 400) {
+						console.error("Input invalido");
+					} else if (err.status == 403) {
+						console.error("Utente non autenticato");
+						this.$router.push("/login");
+					} else if (err.status == 500) {
+						console.error("Errore del server");
+					} else {
+						console.error(
+							"Errore generico: ",
+							err.status,
+							"-",
+							err.code
+						);
+					}
+					this.showError("Errore: File non caricato");
+					console.error("File non caricato");
+				});
+		},
+	},
 };
 </script>
 
 <style>
 .switch {
-  position: relative;
-  display: inline-block;
-  width: 34px;
-  height: 16px;
+	position: relative;
+	display: inline-block;
+	width: 34px;
+	height: 16px;
 }
 
 /* Hide default HTML checkbox */
 .switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+	opacity: 0;
+	width: 0;
+	height: 0;
 }
 
 .slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: #ccc;
+	-webkit-transition: 0.4s;
+	transition: 0.4s;
 }
 
 .slider:before {
-  position: absolute;
-  content: "";
-  height: 13px;
-  width: 13px;
-  left: 2px;
-  bottom: 1px;
-  background-color: white;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
+	position: absolute;
+	content: "";
+	height: 13px;
+	width: 13px;
+	left: 2px;
+	bottom: 1px;
+	background-color: white;
+	-webkit-transition: 0.4s;
+	transition: 0.4s;
 }
 
 input:checked + .slider {
-  background-color: #2196f3;
+	background-color: #2196f3;
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px #2196f3;
+	box-shadow: 0 0 1px #2196f3;
 }
 
 input:checked + .slider:before {
-  -webkit-transform: translateX(18px);
-  -ms-transform: translateX(18px);
-  transform: translateX(18px);
+	-webkit-transform: translateX(18px);
+	-ms-transform: translateX(18px);
+	transform: translateX(18px);
 }
 
 /* Rounded sliders */
 .slider.round {
-  border-radius: 34px;
+	border-radius: 34px;
 }
 
 .slider.round:before {
-  border-radius: 50%;
+	border-radius: 50%;
 }
 </style>

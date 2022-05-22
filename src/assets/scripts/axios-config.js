@@ -10,7 +10,7 @@ let http = axios.create({
 });
 
 http.interceptors.request.use(function (config) {
-    config.headers.Authorization = useUserStore().authToken;
+    config.headers.Authorization = "Bearer " + useUserStore().authToken;
     return config;
 });
 
