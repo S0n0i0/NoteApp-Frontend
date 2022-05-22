@@ -94,9 +94,11 @@
 		<!-- end navbar -->
 		<!-- start activebar -->
 		<div
-			class="h-full w-[100px] bg-secondary activebar touch-none"
+			class="h-full w-[200px] bg-secondary activebar touch-none"
 			v-show="activeBar != 'none'"
-		></div>
+		>
+			<folders v-show="activeBar == 'folders'" />
+		</div>
 		<!-- end activebar -->
 		<!-- start editor -->
 		<div class="flex-1 flex flex-col">
@@ -201,10 +203,11 @@
 </template>
 
 <script>
-import http from "../assets/scripts/axios-config";
+import http from "@/assets/scripts/axios-config";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
-import Editor from "../components/Editor.vue";
-import CustomDialog from "../components/CustomDialog.vue";
+import Editor from "@/components/Editor.vue";
+import CustomDialog from "@/components/CustomDialog.vue";
+import Folders from "@/components/Folders.vue";
 import interact from "interactjs";
 import { Delta } from "@vueup/vue-quill";
 import { API_SAVE_URL, API_LOAD_URL } from "../../config";
@@ -214,6 +217,7 @@ export default {
 	components: {
 		Editor,
 		CustomDialog,
+		Folders,
 	},
 	data() {
 		return {
