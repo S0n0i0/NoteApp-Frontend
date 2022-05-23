@@ -41,8 +41,7 @@ function isLoggedIn() {
 
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !isLoggedIn()) {
-    next();
-    //next({ name: 'login' });
+    next({ name: 'login' });
   } else if (to.name == 'login' && isLoggedIn()) {
     next({ name: 'home' });
   } else if (to.name == 'googleRedirect') {

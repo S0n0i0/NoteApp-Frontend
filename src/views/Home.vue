@@ -89,6 +89,24 @@
 					/>
 					<circle cx="12" cy="12" r="3" />
 				</svg>
+				<svg
+					@click="logout"
+					xmlns="http://www.w3.org/2000/svg"
+					width="25"
+					height="25"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					class="stroke-quaternary cursor-pointer my-4"
+					fill="none"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+					<path
+						d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"
+					/>
+					<path d="M20 12h-13l3 -3m0 6l-3 -3" />
+				</svg>
 			</div>
 		</div>
 		<!-- end navbar -->
@@ -206,6 +224,7 @@ import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import Editor from "../components/Editor.vue";
 import CustomDialog from "../components/CustomDialog.vue";
 import interact from "interactjs";
+import { useUserStore } from "@/stores/userStore";
 import { Delta } from "@vueup/vue-quill";
 import { API_SAVE_URL, API_LOAD_URL } from "../../config";
 
@@ -337,6 +356,11 @@ export default {
 					this.showError("Errore: File non caricato");
 					console.error("File non caricato");
 				});
+		},
+		logout() {
+			localStorage.clear();
+			useUserStore().authToken = "";
+			this.$router.push({ name: "login" });
 		},
 	},
 };
