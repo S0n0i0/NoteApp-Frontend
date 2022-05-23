@@ -1,7 +1,9 @@
 <template>
-	<div class="w-full h-full">
+	<div class="w-full h-full overflow-hidden">
+		<folder-context-menu />
 		<div class="w-full flex justify-end items-center py-3 px-1">
 			<svg
+				@click="addNote"
 				xmlns="http://www.w3.org/2000/svg"
 				width="25"
 				height="25"
@@ -21,6 +23,7 @@
 				<line x1="9" y1="14" x2="15" y2="14" />
 			</svg>
 			<svg
+				@click="addFolder"
 				xmlns="http://www.w3.org/2000/svg"
 				width="25"
 				height="25"
@@ -45,17 +48,31 @@
 
 <script>
 import Folder from "@/components/Folder.vue";
+import FolderContextMenu from "@/components/FolderContextMenu.vue";
 import { useFoldersStore } from "@/stores/foldersStore";
 
 export default {
 	name: "Folders",
 	components: {
 		Folder,
+		FolderContextMenu,
 	},
 	data() {
 		return {
 			store: useFoldersStore(),
 		};
+	},
+	methods: {
+		addItem(type) {
+			this.store.addItem(type);
+			this.store.openRoot = true;
+		},
+		addNote() {
+			this.addItem("note");
+		},
+		addFolder() {
+			this.addItem("folder");
+		},
 	},
 	created() {
 		this.store.init();

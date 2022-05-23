@@ -6,6 +6,15 @@ export const useFoldersStore = defineStore('folders', {
             draggedElement: null,
             items: [],
             root: [],
+            contextMenu: {
+                x: 0,
+                y: 0,
+                show: false,
+                target: null,
+            },
+            editingTarget: null,
+            editingTargetElement: null,
+            openRoot: false,
         };
     },
     getters: {
@@ -99,6 +108,11 @@ export const useFoldersStore = defineStore('folders', {
         move(target, destination) {
             if (target == destination) return;
             if (destination.children.includes(target)) return;
+            let temp = destination.father;
+            while (temp != null) {
+                if (temp == target.id) return;
+                temp = this.itemsMap.get(temp).father;
+            }
             let father = this.itemsMap.get(target.father);
             this.draggedElement = null;
             target.father = destination.id;
@@ -114,7 +128,32 @@ export const useFoldersStore = defineStore('folders', {
                 );
             }
             destination.children.push(target);
-            console.log(target, destination, this.itemsMap.get(-1));
         },
+        delete(target) {
+            let father = this.itemsMap.get(target.father);
+            if (father) father.children.splice(
+                father.children.indexOf(target),
+                1
+            );
+        },
+        closeMenu() {
+            this.contextMenu.show = false;
+            this.contextMenu.target = null;
+        },
+        addItem(type) {
+            let id;
+            do {
+                id = Math.floor(Math.random() * 1000);
+            } while (this.itemsMap.has(id));
+            let obj = {
+                id,
+                father: -1,
+                title: `${type == 'folder' ? 'Cartella' : 'Nota'} #${id}`,
+                type,
+            }
+            if (type == 'folder') obj.children = [];
+            this.items.push(obj);
+            this.itemsMap.get(-1).children.push(obj);
+        }
     }
 });

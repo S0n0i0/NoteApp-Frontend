@@ -1,5 +1,5 @@
 <template>
-	<div class="flex h-full w-full">
+	<div class="flex h-full w-full" @click="outsideClick">
 		<!-- start navbar -->
 		<div
 			class="
@@ -211,6 +211,7 @@ import Folders from "@/components/Folders.vue";
 import interact from "interactjs";
 import { Delta } from "@vueup/vue-quill";
 import { API_SAVE_URL, API_LOAD_URL } from "../../config";
+import { useFoldersStore } from "@/stores/foldersStore";
 
 export default {
 	name: "Home",
@@ -221,6 +222,7 @@ export default {
 	},
 	data() {
 		return {
+			store: useFoldersStore(),
 			note: {
 				//note data
 				id: "6287cc95d93ec8fb38fe19d1",
@@ -341,6 +343,14 @@ export default {
 					this.showError("Errore: File non caricato");
 					console.error("File non caricato");
 				});
+		},
+		outsideClick() {
+			this.store.closeMenu();
+			if (this.store.editingTarget) {
+				this.store.editingTargetElement.blur();
+				this.store.editingTargetElement = null;
+				this.store.editingTarget = null;
+			}
 		},
 	},
 };
