@@ -6,6 +6,10 @@ import { useUserStore } from '@/stores/userStore';
 
 const routes = [
   {
+    path: '/',
+    redirect: '/home'
+  },
+  {
     path: '/login',
     name: 'login',
     component: AuthForm,
@@ -40,6 +44,7 @@ function isLoggedIn() {
 }
 
 router.beforeEach((to, from, next) => {
+  console.log(to,from,next);
   if (to.meta.requiresAuth && !isLoggedIn()) {
     next({ name: 'login' });
   } else if (to.name == 'login' && isLoggedIn()) {
