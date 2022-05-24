@@ -1,5 +1,5 @@
 <template>
-	<div class="pl-4" :class="{ 'pr-2': this.item.id == -1 }">
+	<div class="pl-4" :class="{ 'pr-2': this.item.id == store.rootFolderId }">
 		<div
 			class="
 				flex
@@ -19,6 +19,7 @@
 					dragenter ||
 					store.contextMenu.target == item ||
 					store.editingTarget == item,
+				'bg-primary text-neutral': store.selectedNote == item,
 			}"
 			draggable="true"
 			@click="changeOpen"
@@ -46,7 +47,9 @@
 					pointer-events-none
 				"
 				:class="{
-					'rotate-180': open || (item.id == -1 && store.openRoot),
+					'rotate-180':
+						open ||
+						(item.id == store.rootFolderId && store.openRoot),
 					'group-hover:stroke-primary group-hover:fill-primary stroke-primary fill-primary':
 						dragging ||
 						dragenter ||
@@ -73,7 +76,7 @@
 				/>
 			</div>
 		</div>
-		<div v-show="open || (item.id == -1 && store.openRoot)">
+		<div v-show="open || (item.id == store.rootFolderId && store.openRoot)">
 			<folder
 				v-for="child of item.children || []"
 				:key="child.id"
@@ -85,6 +88,8 @@
 
 <script>
 import { useFoldersStore } from "@/stores/foldersStore";
+import http from "@/assets/scripts/axios-config";
+import { API_NOTES_URL, API_FOLDERS_URL } from "../../config";
 
 export default {
 	name: "Folder",
@@ -101,8 +106,13 @@ export default {
 	},
 	methods: {
 		changeOpen() {
-			this.open = !this.open;
-			this.store.openRoot = false;
+			if (this.item.type == "folder") {
+				this.open = !this.open;
+				this.store.openRoot = false;
+			} else {
+				this.store.selectedNote = this.item;
+				this.store.quillRef.setContents(this.item.content);
+			}
 		},
 		dragStartEvent() {
 			this.dragging = true;
@@ -142,7 +152,7 @@ export default {
 			}
 		},
 		menuEvent(event) {
-			if (this.item.id == -1) return;
+			if (this.item.id == this.store.rootFolderId) return;
 			let menu = this.store.contextMenu;
 			menu.x = event.clientX;
 			menu.y = event.clientY;
@@ -150,11 +160,29 @@ export default {
 			menu.target = this.item;
 			this.store.editingTargetElement = this.$refs.input;
 		},
-		enterListener(event) {
+		async enterListener(event) {
 			if (event.key == "Enter") {
+				let target = this.store.editingTarget;
 				this.store.editingTargetElement.blur();
 				this.store.editingTargetElement = null;
 				this.store.editingTarget = null;
+				try {
+					let data = {
+						newname: target.title,
+						newparent: target.father,
+					};
+					if (target.type == "note") data.newcontent = target.content;
+					await http.put(
+						`${
+							target.type == "folder"
+								? API_FOLDERS_URL
+								: API_NOTES_URL
+						}/${target.id}`,
+						data
+					);
+				} catch (error) {
+					console.error(error);
+				}
 			}
 		},
 	},

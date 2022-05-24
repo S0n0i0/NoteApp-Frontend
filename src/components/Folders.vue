@@ -63,19 +63,19 @@ export default {
 		};
 	},
 	methods: {
-		addItem(type) {
-			this.store.addItem(type);
+		async addItem(type) {
+			await this.store.addItem(type);
 			this.store.openRoot = true;
 		},
-		addNote() {
-			this.addItem("note");
+		async addNote() {
+			await this.addItem("note");
 		},
-		addFolder() {
-			this.addItem("folder");
+		async addFolder() {
+			await this.addItem("folder");
 		},
 	},
-	created() {
-		this.store.init();
+	async created() {
+		await this.store.init();
 	},
 };
 </script>

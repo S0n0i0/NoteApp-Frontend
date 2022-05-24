@@ -71,8 +71,8 @@ export default {
 			this.store.closeMenu();
 			this.store.editingTargetElement.focus();
 		},
-		elimina() {
-			this.store.delete(this.store.contextMenu.target);
+		async elimina() {
+			await this.store.delete(this.store.contextMenu.target);
 			this.store.closeMenu();
 		},
 	},

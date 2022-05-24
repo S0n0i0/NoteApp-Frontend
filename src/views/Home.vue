@@ -101,13 +101,20 @@
 		</div>
 		<!-- end activebar -->
 		<!-- start editor -->
-		<div class="flex-1 flex flex-col">
+		<div
+			class="flex-1 flex-col"
+			:class="{
+				hidden: !store.selectedNote.id,
+				flex: store.selectedNote.id,
+			}"
+		>
 			<!-- start titlebar -->
 			<div class="h-[50px] bg-primary flex items-center">
 				<input
 					type="text"
 					class="flex-1 bg-primary text-secondary font-medium ml-4"
-					v-model="note.title"
+					v-model="store.selectedNote.title"
+					@blur="saveTitleChange"
 				/>
 				<div class="flex">
 					<label class="text-neutral text-1s mt-1"
@@ -186,7 +193,7 @@
 					ref="editor"
 					@autoSave="save"
 					:contentType="editor.contentType"
-					:content="editor.content"
+					:content="store.selectedNote.content"
 					:readOnly="editor.readOnly"
 					:autoSaving="editor.autoSaving"
 					:options="editor.options"
@@ -210,7 +217,12 @@ import CustomDialog from "@/components/CustomDialog.vue";
 import Folders from "@/components/Folders.vue";
 import interact from "interactjs";
 import { Delta } from "@vueup/vue-quill";
-import { API_SAVE_URL, API_LOAD_URL } from "../../config";
+import {
+	API_SAVE_URL,
+	API_LOAD_URL,
+	API_NOTES_URL,
+	API_FOLDERS_URL,
+} from "../../config";
 import { useFoldersStore } from "@/stores/foldersStore";
 
 export default {
@@ -225,8 +237,11 @@ export default {
 			store: useFoldersStore(),
 			note: {
 				//note data
-				id: "6287cc95d93ec8fb38fe19d1",
-				description: "",
+				id: "",
+				content: "",
+				title: "",
+				father: "",
+				type: "",
 			},
 			activeBar: "none", //none, folders, search, user, options
 			error: {
@@ -246,6 +261,7 @@ export default {
 		};
 	},
 	mounted() {
+		this.store.quillRef = this.$refs.editor;
 		// initialize resizable activebar
 		interact(".activebar").resizable({
 			edges: {
@@ -289,9 +305,11 @@ export default {
 			} else {
 				console.log("Salvataggio automatico");
 			}
-			http.put(API_SAVE_URL + "/" + this.note.id, {
-				title: this.note.title,
-				ops: changes.ops,
+			let target = this.store.selectedNote;
+			http.put(API_SAVE_URL + "/" + target.id, {
+				newfather: target.title,
+				newcontent: changes.ops,
+				newname: target.title,
 			})
 				.then((response) => {
 					console.log("File salvato");
@@ -344,12 +362,44 @@ export default {
 					console.error("File non caricato");
 				});
 		},
-		outsideClick() {
+		async saveTitleChange() {
+			let target = this.store.selectedNote;
+			console.log(target);
+			let data = {
+				newname: target.title,
+				newparent: target.father,
+				newcontent: target.content,
+			};
+			try {
+				await http.put(`${API_NOTES_URL}/${target.id}`, data);
+			} catch (error) {
+				console.error(error);
+			}
+		},
+		async outsideClick() {
 			this.store.closeMenu();
 			if (this.store.editingTarget) {
+				let target = this.store.editingTarget;
 				this.store.editingTargetElement.blur();
 				this.store.editingTargetElement = null;
 				this.store.editingTarget = null;
+				try {
+					let data = {
+						newname: target.title,
+						newparent: target.father,
+					};
+					if (target.type == "note") data.newcontent = target.content;
+					await http.put(
+						`${
+							target.type == "folder"
+								? API_FOLDERS_URL
+								: API_NOTES_URL
+						}/${target.id}`,
+						data
+					);
+				} catch (error) {
+					console.error(error);
+				}
 			}
 		},
 	},
