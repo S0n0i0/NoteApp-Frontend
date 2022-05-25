@@ -12,6 +12,7 @@
 				hover:bg-primary hover:text-neutral
 				overflow-hidden
 				whitespace-nowrap
+				w-full
 			"
 			:class="{
 				'hover:bg-quaternary hover:text-primary bg-quaternary text-primary':
@@ -65,16 +66,48 @@
 				/>
 			</svg>
 			<div
-				class="mx-1"
+				class="mx-1 max-w-full overflow-hidden"
 				:class="{ 'pointer-events-none': store.editingTarget != item }"
 			>
 				<input
 					ref="input"
 					class="bg-transparent block"
+					:style="{ width: `${item.title.length + 1}ch` }"
 					v-model="item.title"
 					@keypress="enterListener"
 				/>
 			</div>
+			<svg
+				v-if="item.type == 'note'"
+				v-show="item.saved == 0"
+				xmlns="http://www.w3.org/2000/svg"
+				width="14"
+				height="14"
+				viewBox="0 0 24 24"
+				stroke-width="0"
+				class="
+					fill-primary
+					min-w-[14px] min-h-[14px]
+					group-hover:fill-neutral
+				"
+				:class="{
+					'group-hover:fill-primary fill-primary':
+						dragging ||
+						store.contextMenu.target == item ||
+						store.editingTarget == item,
+					'fill-neutral':
+						store.selectedNote == item &&
+						!(
+							store.contextMenu.target == item ||
+							store.editingTarget == item
+						),
+				}"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+				<circle cx="12" cy="12" r="9" />
+			</svg>
 		</div>
 		<div v-show="open || (item.id == store.rootFolderId && store.openRoot)">
 			<folder
@@ -110,6 +143,7 @@ export default {
 				this.open = !this.open;
 				this.store.openRoot = false;
 			} else {
+				if (this.item.saved != 0) this.item.saved = 2;
 				this.store.selectedNote = this.item;
 				this.store.quillRef.setContents(this.item.content);
 			}

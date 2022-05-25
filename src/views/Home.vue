@@ -325,6 +325,7 @@ export default {
 				console.log("Salvataggio automatico");
 			}
 			let target = this.store.selectedNote;
+			target.saved = true;
 			http.put(API_SAVE_URL + "/" + target.id, {
 				newfather: target.title,
 				newcontent: changes.ops,

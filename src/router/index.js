@@ -26,6 +26,12 @@ const routes = [
     path: '/google-redirect',
     name: 'googleRedirect',
     component: GoogleRedirect,
+  },
+  {
+    path: '/:catchAll(.*)',
+    redirect: {
+      name: 'home'
+    }
   }
 ];
 
@@ -44,7 +50,7 @@ function isLoggedIn() {
 }
 
 router.beforeEach((to, from, next) => {
-  console.log(to,from,next);
+  console.log(to, from, next);
   if (to.meta.requiresAuth && !isLoggedIn()) {
     next({ name: 'login' });
   } else if (to.name == 'login' && isLoggedIn()) {

@@ -70,14 +70,19 @@ export const useFoldersStore = defineStore('folders', {
                     content: JSON.parse(x.content),
                 }))
             ];
+            for (let item of itemsList) {
+                if (item.type == 'folder') {
+                    item.children = [];
+                } else {
+                    item.saved = 2;
+                }
+            }
             console.log(itemsList);
             this.items = itemsList;
             this.root.length = 0;
             for (let [id, item] of this.itemsMap) {
-                if (!item.children && item.type == "folder") item.children = [];
                 if (item.father != null) {
                     let father = this.itemsMap.get(item.father);
-                    if (!father.children) father.children = [];
                     father.children.push(item);
                 } else {
                     this.root.push(item);

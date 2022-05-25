@@ -63,6 +63,9 @@ export default {
 					temp.emit("autoSave", temp.changes);
 					temp.deleteChanges();
 				}, 2000);
+			} else {
+				if (this.store.selectedNote.saved != 0)
+					this.store.selectedNote.saved--;
 			}
 		},
 		getContents() {
