@@ -150,10 +150,10 @@
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="
-						icon icon-tabler icon-tabler-device-floppy
 						stroke-neutral
 						ml-4
 						cursor-pointer
+						min-w-[20px] min-h-[20px]
 					"
 					width="20"
 					height="20"
@@ -178,7 +178,12 @@
 					height="20"
 					viewBox="0 0 24 24"
 					stroke-width="2"
-					class="stroke-neutral ml-4 cursor-pointer"
+					class="
+						stroke-neutral
+						ml-4
+						cursor-pointer
+						min-w-[20px] min-h-[20px]
+					"
 					fill="none"
 					stroke-linecap="round"
 					stroke-linejoin="round"
@@ -194,7 +199,12 @@
 					height="20"
 					viewBox="0 0 24 24"
 					stroke-width="2"
-					class="stroke-neutral mx-4 cursor-pointer"
+					class="
+						stroke-neutral
+						mx-4
+						cursor-pointer
+						min-w-[20px] min-h-[20px]
+					"
 					fill="none"
 					stroke-linecap="round"
 					stroke-linejoin="round"

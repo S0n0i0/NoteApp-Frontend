@@ -47,7 +47,10 @@ export const useFoldersStore = defineStore('folders', {
                 ]);
                 this.rootFolderId = folders.data.rootFolder._id;
             } catch (error) {
+                this.items = [];
+                this.root = [];
                 console.error(error);
+                return;
             }
             let itemsList = [
                 {
@@ -99,6 +102,17 @@ export const useFoldersStore = defineStore('folders', {
             }
             let father = this.itemsMap.get(target.father);
             this.draggedElement = null;
+            try {
+                let data = {
+                    newname: target.title,
+                    newparent: destination.id,
+                };
+                if (target.type == 'note') data.newcontent = target.content;
+                await http.put(`${target.type == 'folder' ? API_FOLDERS_URL : API_NOTES_URL}/${target.id}`, data);
+            } catch (error) {
+                console.error(error);
+                return;
+            }
             target.father = destination.id;
             if (father) {
                 father.children.splice(
@@ -112,28 +126,19 @@ export const useFoldersStore = defineStore('folders', {
                 );
             }
             destination.children.push(target);
-            try {
-                let data = {
-                    newname: target.title,
-                    newparent: destination.id,
-                };
-                if (target.type == 'note') data.newcontent = target.content;
-                await http.put(`${target.type == 'folder' ? API_FOLDERS_URL : API_NOTES_URL}/${target.id}`, data);
-            } catch (error) {
-                console.error(error);
-            }
         },
         async delete(target) {
+            try {
+                await http.delete(`${target.type == 'folder' ? API_FOLDERS_URL : API_NOTES_URL}/${target.id}`);
+            } catch (error) {
+                console.error(error);
+                return;
+            }
             let father = this.itemsMap.get(target.father);
             if (father) father.children.splice(
                 father.children.indexOf(target),
                 1
             );
-            try {
-                await http.delete(`${target.type == 'folder' ? API_FOLDERS_URL : API_NOTES_URL}/${target.id}`);
-            } catch (error) {
-                console.error(error);
-            }
         },
         closeMenu() {
             this.contextMenu.show = false;
@@ -150,9 +155,11 @@ export const useFoldersStore = defineStore('folders', {
                 title: `${type == 'folder' ? 'Cartella' : 'Nota'} #${id}`,
                 type,
             }
-            if (type == 'folder') obj.children = [];
-            this.items.push(obj);
-            this.itemsMap.get(this.rootFolderId).children.push(obj);
+            if (type == 'folder') {
+                obj.children = [];
+            } else {
+                obj.saved = 2;
+            }
             try {
                 let response = await http.post(type == 'folder' ? API_FOLDERS_URL : API_NOTES_URL, {
                     name: obj.title,
@@ -163,7 +170,10 @@ export const useFoldersStore = defineStore('folders', {
                 console.log(obj);
             } catch (error) {
                 console.error(error);
+                return;
             }
+            this.items.push(obj);
+            this.itemsMap.get(this.rootFolderId).children.push(obj);
         }
     }
 });
