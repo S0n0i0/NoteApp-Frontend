@@ -172,6 +172,23 @@
 					<circle cx="12" cy="14" r="2" />
 					<polyline points="14 4 14 8 8 8 8 4" />
 				</svg>
+				<svg 
+					xmlns="http://www.w3.org/2000/svg"
+					class="icon icon-tabler icon-tabler-file-export cursor-pointer ml-4"
+					width="20"
+					height="20"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					stroke="#ffffff"
+					fill="none"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					@click="showExport"
+				>
+					<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+					<path d="M14 3v4a1 1 0 0 0 1 1h4" />
+					<path d="M11.5 21h-4.5a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v5m-5 6h7m-3 -3l3 3l-3 3" />
+				</svg>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					width="20"
@@ -227,6 +244,11 @@
 					:options="editor.options"
 				/>
 			</div>
+			<export-dialog
+				ref="toExport"
+				@exportNote="exportNote"
+				:open="toExport.show"
+			/>
 			<custom-dialog
 				@close="error.show = false"
 				:open="error.show"
@@ -243,6 +265,7 @@ import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import Editor from "@/components/Editor.vue";
 import CustomDialog from "@/components/CustomDialog.vue";
 import Folders from "@/components/Folders.vue";
+import ExportDialog from "@/components/ExportDialog.vue";
 import interact from "interactjs";
 import { useUserStore } from "@/stores/userStore";
 import { Delta } from "@vueup/vue-quill";
@@ -253,6 +276,8 @@ import {
 	API_FOLDERS_URL,
 } from "../../config";
 import { useFoldersStore } from "@/stores/foldersStore";
+import { saveAs } from 'file-saver';
+import { pdfExporter } from 'quill-to-pdf';
 
 export default {
 	name: "Home",
@@ -260,6 +285,7 @@ export default {
 		Editor,
 		CustomDialog,
 		Folders,
+		ExportDialog
 	},
 	data() {
 		return {
@@ -276,6 +302,9 @@ export default {
 			error: {
 				show: false,
 				description: "",
+			},
+			toExport: {
+				show: false
 			},
 			editor: {
 				//Editor data
@@ -324,6 +353,11 @@ export default {
 			this.error.description = description;
 			this.error.show = true;
 			this.editor.autoSaving = false;
+		},
+		showExport() {
+			console.log(this.$refs.toExport);
+			this.$refs.toExport.setName(this.store.selectedNote.title)
+			this.toExport.show = true;
 		},
 		save(changes) {
 			//Send a save request to the database to save the note
@@ -437,6 +471,12 @@ export default {
 				}
 			}
 		},
+		async exportNote(name) {
+			let target = this.store.selectedNote;
+			const pdfAsBlob = await pdfExporter.generatePdf(this.$refs.editor.getContents()); // converts to PDF
+			saveAs(pdfAsBlob, name); // downloads from the browser
+			this.toExport.show = false;
+		}
 	},
 };
 </script>
