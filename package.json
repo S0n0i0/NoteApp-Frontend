@@ -15,6 +15,7 @@
     "pinia": "^2.0.14",
     "pinia-plugin-persistedstate": "^1.5.2",
     "postcss": "^8.4.13",
+    "quill-delta-to-markdown": "^0.6.0",
     "quill-to-pdf": "^1.0.7",
     "tailwindcss": "^3.0.24",
     "vue": "^3.2.13",

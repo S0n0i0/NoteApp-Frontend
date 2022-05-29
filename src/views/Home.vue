@@ -278,6 +278,7 @@ import {
 import { useFoldersStore } from "@/stores/foldersStore";
 import { saveAs } from 'file-saver';
 import { pdfExporter } from 'quill-to-pdf';
+import { deltaToMarkdown } from 'quill-delta-to-markdown';
 
 export default {
 	name: "Home",
@@ -471,10 +472,17 @@ export default {
 				}
 			}
 		},
-		async exportNote(name) {
-			let target = this.store.selectedNote;
-			const pdfAsBlob = await pdfExporter.generatePdf(this.$refs.editor.getContents()); // converts to PDF
-			saveAs(pdfAsBlob, name); // downloads from the browser
+		async exportNote(fileName) {
+			let fileBlob;
+			let content = this.$refs.editor.getContents()
+			if (fileName.type === 'pdf') {
+				fileBlob = await pdfExporter.generatePdf(content); //Converts to pdf
+			} else if (fileName.type === 'md') {
+				fileBlob = new Blob([deltaToMarkdown(content.ops)], {
+					type: 'text/markdown'
+				}); //Converts to Markdown
+			}
+			saveAs(fileBlob, fileName.name + "." + fileName.type); //Downloads from the browser
 			this.toExport.show = false;
 		}
 	},

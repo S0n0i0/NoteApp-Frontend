@@ -18,7 +18,7 @@
   >
     <div
       class="
-        min-w-[150px] min-h-[300px]
+        min-w-[150px]
         w-1/3
         p-4
         bg-primary
@@ -42,6 +42,7 @@
         <label class="mr-2">Tipo di file:</label>
         <select ref="type" v-model="type" class="text-primary">
           <option value="pdf">pdf</option>
+          <option value="md">Markdown</option>
         </select>
       </div>
       <button
@@ -55,7 +56,7 @@
           w-fit
           rounded-md
         "
-        @click="$emit('exportNote', name + '.' + type)"
+        @click="$emit('exportNote', {name,type})"
       >
         Esporta
       </button>
