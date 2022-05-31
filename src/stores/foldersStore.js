@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import http from "@/assets/scripts/axios-config";
-import { API_NOTES_URL, API_FOLDERS_URL } from "../../config";
+import { API_NOTES_URL, API_FOLDERS_URL, API_SHARED_NOTES } from "../../config";
 
 export const useFoldersStore = defineStore('folders', {
     state: () => {
@@ -9,6 +9,7 @@ export const useFoldersStore = defineStore('folders', {
             items: [],
             root: [],
             rootFolderId: null,
+            sharedFolderId: -2,
             contextMenu: {
                 x: 0,
                 y: 0,
@@ -30,6 +31,8 @@ export const useFoldersStore = defineStore('folders', {
                 }
             },
             quillRef: null,
+            showShareDialog: false,
+            shareDialogMode: 'get', //get, import
         };
     },
     getters: {
@@ -39,11 +42,12 @@ export const useFoldersStore = defineStore('folders', {
     },
     actions: {
         async init() {
-            let notes, folders;
+            let notes, folders, shared;
             try {
-                [notes, folders] = await Promise.all([
+                [notes, folders, shared] = await Promise.all([
                     http.get(API_NOTES_URL),
-                    http.get(API_FOLDERS_URL)
+                    http.get(API_FOLDERS_URL),
+                    http.get(API_SHARED_NOTES)
                 ]);
                 this.rootFolderId = folders.data.rootFolder._id;
             } catch (error) {
@@ -52,11 +56,29 @@ export const useFoldersStore = defineStore('folders', {
                 console.error(error);
                 return;
             }
+            let sharedNotes
+            try {
+                sharedNotes = await Promise.allSettled(shared.data.map(
+                    x => http.get(`${API_SHARED_NOTES}/share/${x.userid}/${x.noteid}`)
+                ));
+                sharedNotes = sharedNotes.filter(x => x.status != 'rejected').map(x => x.value.data);
+            } catch (error) {
+                sharedNotes = [];
+                console.error(error);
+                return;
+            }
+            let sharedFolderId = this.sharedFolderId;
             let itemsList = [
                 {
                     id: this.rootFolderId,
                     father: null,
                     title: 'Le mie note',
+                    type: 'folder',
+                },
+                {
+                    id: this.sharedFolderId,
+                    father: null,
+                    title: 'Note condivise',
                     type: 'folder',
                 },
                 ...folders.data.folders.map(x => ({
@@ -71,6 +93,15 @@ export const useFoldersStore = defineStore('folders', {
                     title: x.name,
                     type: 'note',
                     content: JSON.parse(x.content),
+                    shared: x.shared,
+                })),
+                ...sharedNotes.map(x => ({
+                    id: x._id,
+                    father: sharedFolderId,
+                    title: x.name,
+                    type: 'note',
+                    content: JSON.parse(x.content),
+                    shared: x.shared,
                 }))
             ];
             for (let item of itemsList) {
@@ -80,7 +111,7 @@ export const useFoldersStore = defineStore('folders', {
                     item.saved = 2;
                 }
             }
-            console.log(itemsList);
+            //console.log(itemsList);
             this.items = itemsList;
             this.root.length = 0;
             for (let [id, item] of this.itemsMap) {
@@ -95,6 +126,8 @@ export const useFoldersStore = defineStore('folders', {
         async move(target, destination) {
             if (target == destination) return;
             if (destination.children.includes(target)) return;
+            if (destination.id == this.sharedFolderId) return;
+            if (target.father == this.sharedFolderId) return;
             let temp = destination.father;
             while (temp != null) {
                 if (temp == target.id) return;
@@ -166,7 +199,7 @@ export const useFoldersStore = defineStore('folders', {
                     parent: this.rootFolderId
                 });
                 obj.id = response.data._id;
-                obj.content = JSON.parse(response.data.content);
+                obj.content = response.data.content;
                 console.log(obj);
             } catch (error) {
                 console.error(error);

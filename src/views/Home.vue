@@ -118,6 +118,11 @@
 			<folders v-show="activeBar == 'folders'" />
 		</div>
 		<!-- end activebar -->
+		<share-dialog
+			:open="store.showShareDialog"
+			:mode="store.shareDialogMode"
+			@close="store.showShareDialog = false"
+		/>
 		<!-- start editor -->
 		<div
 			class="flex-1 flex-col"
@@ -131,10 +136,19 @@
 				<input
 					type="text"
 					class="flex-1 bg-primary text-secondary font-medium ml-4"
+					:disabled="
+						store.selectedNote.father == store.sharedFolderId
+					"
 					v-model="store.selectedNote.title"
 					@blur="saveTitleChange"
 				/>
-				<div class="flex">
+				<div
+					:class="{
+						flex: store.selectedNote.father != store.sharedFolderId,
+						hidden:
+							store.selectedNote.father == store.sharedFolderId,
+					}"
+				>
 					<label class="text-neutral text-1s mt-1"
 						>Salvataggio automatico</label
 					>
@@ -148,6 +162,32 @@
 					</label>
 				</div>
 				<svg
+					v-show="store.selectedNote.father != store.sharedFolderId"
+					@click="openShareDialog('get')"
+					xmlns="http://www.w3.org/2000/svg"
+					class="
+						stroke-neutral
+						ml-4
+						cursor-pointer
+						min-w-[20px] min-h-[20px]
+					"
+					width="20"
+					height="20"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					fill="none"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+					<circle cx="6" cy="12" r="3" />
+					<circle cx="18" cy="6" r="3" />
+					<circle cx="18" cy="18" r="3" />
+					<line x1="8.7" y1="10.7" x2="15.3" y2="7.3" />
+					<line x1="8.7" y1="13.3" x2="15.3" y2="16.7" />
+				</svg>
+				<svg
+					v-show="store.selectedNote.father != store.sharedFolderId"
 					xmlns="http://www.w3.org/2000/svg"
 					class="
 						stroke-neutral
@@ -190,6 +230,7 @@
 					<path d="M11.5 21h-4.5a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v5m-5 6h7m-3 -3l3 3l-3 3" />
 				</svg>
 				<svg
+					v-show="store.selectedNote.father != store.sharedFolderId"
 					xmlns="http://www.w3.org/2000/svg"
 					width="20"
 					height="20"
@@ -233,7 +274,13 @@
 				</svg>
 			</div>
 			<!-- end titlebar -->
-			<div class="editor-container flex flex-col">
+			<div
+				class="editor-container flex flex-col"
+				:class="{
+					'pointer-events-none':
+						store.selectedNote.father == store.sharedFolderId,
+				}"
+			>
 				<editor
 					ref="editor"
 					@autoSave="save"
@@ -265,6 +312,7 @@ import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import Editor from "@/components/Editor.vue";
 import CustomDialog from "@/components/CustomDialog.vue";
 import Folders from "@/components/Folders.vue";
+import ShareDialog from "@/components/ShareDialog.vue";
 import ExportDialog from "@/components/ExportDialog.vue";
 import interact from "interactjs";
 import { useUserStore } from "@/stores/userStore";
@@ -287,6 +335,7 @@ export default {
 		CustomDialog,
 		Folders,
 		ExportDialog
+		ShareDialog,
 	},
 	data() {
 		return {
@@ -472,6 +521,10 @@ export default {
 				}
 			}
 		},
+		openShareDialog(mode) {
+			this.store.showShareDialog = true;
+			this.store.shareDialogMode = mode;
+		},
 		async exportNote(fileName) {
 			let fileBlob;
 			let content = this.$refs.editor.getContents()
@@ -529,11 +582,11 @@ export default {
 }
 
 input:checked + .slider {
-	background-color: #2196f3;
+	background-color: var(--color-secondary);
 }
 
 input:focus + .slider {
-	box-shadow: 0 0 1px #2196f3;
+	box-shadow: 0 0 1px var(--color-secondary);
 }
 
 input:checked + .slider:before {

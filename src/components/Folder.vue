@@ -165,6 +165,8 @@ export default {
 					this.item,
 				];
 				if (destination.children.includes(target)) return;
+				if (destination.id == this.store.sharedFolderId) return;
+				if (target.father == this.store.sharedFolderId) return;
 				let temp = destination.father;
 				while (temp != null) {
 					if (temp == target.id) return;
@@ -187,6 +189,8 @@ export default {
 		},
 		menuEvent(event) {
 			if (this.item.id == this.store.rootFolderId) return;
+			if (this.item.id == this.store.sharedFolderId) return;
+			if (this.item.father == this.store.sharedFolderId) return;
 			let menu = this.store.contextMenu;
 			menu.x = event.clientX;
 			menu.y = event.clientY;
