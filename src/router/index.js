@@ -41,9 +41,16 @@ const router = createRouter({
 });
 
 function isLoggedIn() {
-  let token = useUserStore().authToken;
+  let store = useUserStore();
+  let token = store.authToken;
   if (token) {
-    return true;
+    let payload = store.decode();
+    if (new Date() > new Date(payload.exp * 1000)) {
+      localStorage.clear();
+      return false;
+    } else {
+      return true;
+    }
   } else {
     return false;
   }

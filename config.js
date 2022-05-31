@@ -6,6 +6,9 @@ const API_SAVE_URL = '/notes';
 const API_LOAD_URL = '/notes';
 const API_NOTES_URL = '/notes';
 const API_FOLDERS_URL = '/folders';
+const API_SHARED_NOTES = '/share';
+const API_SHARE_PUBLIC = '/share/public';
+const API_SHARE_PRIVATE = '/share/private';
 
 export {
     API_BASE_URL,
@@ -16,4 +19,7 @@ export {
     API_LOAD_URL,
     API_NOTES_URL,
     API_FOLDERS_URL,
+    API_SHARED_NOTES,
+    API_SHARE_PUBLIC,
+    API_SHARE_PRIVATE,
 }

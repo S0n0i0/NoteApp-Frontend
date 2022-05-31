@@ -6,5 +6,14 @@ export const useUserStore = defineStore('user', {
             authToken: ''
         };
     },
+    actions: {
+        decode() {
+            return JSON.parse(
+                atob(
+                    this.authToken.split('.')[1]
+                )
+            );
+        }
+    },
     persist: true,
 });
