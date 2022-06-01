@@ -212,9 +212,13 @@
 					<circle cx="12" cy="14" r="2" />
 					<polyline points="14 4 14 8 8 8 8 4" />
 				</svg>
-				<svg 
+				<svg
 					xmlns="http://www.w3.org/2000/svg"
-					class="icon icon-tabler icon-tabler-file-export cursor-pointer ml-4"
+					class="
+						icon icon-tabler icon-tabler-file-export
+						cursor-pointer
+						ml-4
+					"
 					width="20"
 					height="20"
 					viewBox="0 0 24 24"
@@ -225,9 +229,11 @@
 					stroke-linejoin="round"
 					@click="showExport"
 				>
-					<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 					<path d="M14 3v4a1 1 0 0 0 1 1h4" />
-					<path d="M11.5 21h-4.5a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v5m-5 6h7m-3 -3l3 3l-3 3" />
+					<path
+						d="M11.5 21h-4.5a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v5m-5 6h7m-3 -3l3 3l-3 3"
+					/>
 				</svg>
 				<svg
 					v-show="store.selectedNote.father != store.sharedFolderId"
@@ -324,9 +330,9 @@ import {
 	API_FOLDERS_URL,
 } from "../../config";
 import { useFoldersStore } from "@/stores/foldersStore";
-import { saveAs } from 'file-saver';
-import { pdfExporter } from 'quill-to-pdf';
-import { deltaToMarkdown } from 'quill-delta-to-markdown';
+import { saveAs } from "file-saver";
+import { pdfExporter } from "quill-to-pdf";
+import { deltaToMarkdown } from "quill-delta-to-markdown";
 
 export default {
 	name: "Home",
@@ -334,7 +340,7 @@ export default {
 		Editor,
 		CustomDialog,
 		Folders,
-		ExportDialog
+		ExportDialog,
 		ShareDialog,
 	},
 	data() {
@@ -354,7 +360,7 @@ export default {
 				description: "",
 			},
 			toExport: {
-				show: false
+				show: false,
 			},
 			editor: {
 				//Editor data
@@ -406,7 +412,7 @@ export default {
 		},
 		showExport() {
 			console.log(this.$refs.toExport);
-			this.$refs.toExport.setName(this.store.selectedNote.title)
+			this.$refs.toExport.setName(this.store.selectedNote.title);
 			this.toExport.show = true;
 		},
 		save(changes) {
@@ -527,17 +533,17 @@ export default {
 		},
 		async exportNote(fileName) {
 			let fileBlob;
-			let content = this.$refs.editor.getContents()
-			if (fileName.type === 'pdf') {
+			let content = this.$refs.editor.getContents();
+			if (fileName.type === "pdf") {
 				fileBlob = await pdfExporter.generatePdf(content); //Converts to pdf
-			} else if (fileName.type === 'md') {
+			} else if (fileName.type === "md") {
 				fileBlob = new Blob([deltaToMarkdown(content.ops)], {
-					type: 'text/markdown'
+					type: "text/markdown",
 				}); //Converts to Markdown
 			}
 			saveAs(fileBlob, fileName.name + "." + fileName.type); //Downloads from the browser
 			this.toExport.show = false;
-		}
+		},
 	},
 };
 </script>
