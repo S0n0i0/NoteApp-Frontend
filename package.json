@@ -11,6 +11,7 @@
     "autoprefixer": "^10.4.7",
     "axios": "^0.27.2",
     "file-saver": "^2.0.5",
+    "fuse.js": "^6.6.2",
     "interactjs": "^1.10.11",
     "pinia": "^2.0.14",
     "pinia-plugin-persistedstate": "^1.5.2",

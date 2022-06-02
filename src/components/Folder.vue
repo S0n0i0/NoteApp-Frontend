@@ -221,6 +221,7 @@ export default {
 				} catch (error) {
 					console.error(error);
 				}
+				this.store.updateFuse();
 			}
 		},
 	},

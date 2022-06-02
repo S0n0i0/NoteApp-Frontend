@@ -18,18 +18,17 @@
 					height="25"
 					viewBox="0 0 24 24"
 					stroke-width="1.5"
-					class="
-						stroke-quaternary
-						cursor-pointer
-						my-4
-						hover:stroke-secondary
+					class="cursor-pointer my-4 hover:stroke-secondary"
+					:class="
+						activeBar == 'folders'
+							? 'stroke-secondary'
+							: 'stroke-quaternary'
 					"
-					:class="{ 'stroke-secondary': activeBar == 'folders' }"
 					fill="none"
 					stroke-linecap="round"
 					stroke-linejoin="round"
 					@click="
-						activeBar = activeBar == 'folders' ? 'none' : 'folders'
+						activeBar = activeBar != 'folders' ? 'folders' : 'none'
 					"
 				>
 					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -46,10 +45,18 @@
 					height="25"
 					viewBox="0 0 24 24"
 					stroke-width="1.5"
-					class="stroke-quaternary cursor-pointer my-4"
+					class="cursor-pointer my-4 hover:stroke-secondary"
+					:class="
+						activeBar == 'search'
+							? 'stroke-secondary'
+							: 'stroke-quaternary'
+					"
 					fill="none"
 					stroke-linecap="round"
 					stroke-linejoin="round"
+					@click="
+						activeBar = activeBar != 'search' ? 'search' : 'none'
+					"
 				>
 					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 					<circle cx="10" cy="10" r="7" />
@@ -116,6 +123,7 @@
 			v-show="activeBar != 'none'"
 		>
 			<folders v-show="activeBar == 'folders'" />
+			<search v-show="activeBar == 'search'" />
 		</div>
 		<!-- end activebar -->
 		<share-dialog
@@ -320,6 +328,7 @@ import CustomDialog from "@/components/CustomDialog.vue";
 import Folders from "@/components/Folders.vue";
 import ShareDialog from "@/components/ShareDialog.vue";
 import ExportDialog from "@/components/ExportDialog.vue";
+import Search from "@/components/Search.vue";
 import interact from "interactjs";
 import { useUserStore } from "@/stores/userStore";
 import { Delta } from "@vueup/vue-quill";
@@ -342,6 +351,7 @@ export default {
 		Folders,
 		ExportDialog,
 		ShareDialog,
+		Search,
 	},
 	data() {
 		return {
@@ -500,6 +510,7 @@ export default {
 			} catch (error) {
 				console.error(error);
 			}
+			this.store.updateFuse();
 		},
 		async outsideClick() {
 			this.store.closeMenu();
@@ -525,6 +536,7 @@ export default {
 				} catch (error) {
 					console.error(error);
 				}
+				this.store.updateFuse();
 			}
 		},
 		openShareDialog(mode) {
