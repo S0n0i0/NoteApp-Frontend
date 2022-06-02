@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import http from "@/assets/scripts/axios-config";
+import Fuse from "fuse.js";
 import { API_NOTES_URL, API_FOLDERS_URL, API_SHARED_NOTES } from "../../config";
 
 export const useFoldersStore = defineStore('folders', {
@@ -33,6 +34,11 @@ export const useFoldersStore = defineStore('folders', {
             quillRef: null,
             showShareDialog: false,
             shareDialogMode: 'get', //get, import
+            fuse: new Fuse([], {
+                threshold: 0.5,
+                keys: ['title', 'type'],
+                useExtendedSearch: true,
+            }),
         };
     },
     getters: {
@@ -122,6 +128,7 @@ export const useFoldersStore = defineStore('folders', {
                     this.root.push(item);
                 }
             }
+            this.updateFuse();
         },
         async move(target, destination) {
             if (target == destination) return;
@@ -207,6 +214,9 @@ export const useFoldersStore = defineStore('folders', {
             }
             this.items.push(obj);
             this.itemsMap.get(this.rootFolderId).children.push(obj);
+        },
+        updateFuse() {
+            this.fuse.setCollection(this.items);
         }
     }
 });
