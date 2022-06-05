@@ -245,6 +245,7 @@
 				</svg>
 				<svg
 					v-show="store.selectedNote.father != store.sharedFolderId"
+					@click="changeFavoriteStatus"
 					xmlns="http://www.w3.org/2000/svg"
 					width="20"
 					height="20"
@@ -256,7 +257,7 @@
 						cursor-pointer
 						min-w-[20px] min-h-[20px]
 					"
-					fill="none"
+					:class="{ 'fill-neutral': store.selectedNote.favorite }"
 					stroke-linecap="round"
 					stroke-linejoin="round"
 				>
@@ -555,6 +556,21 @@ export default {
 			}
 			saveAs(fileBlob, fileName.name + "." + fileName.type); //Downloads from the browser
 			this.toExport.show = false;
+		},
+		async changeFavoriteStatus() {
+			let selectedNote = this.store.selectedNote;
+			try {
+				await http.put(`${API_NOTES_URL}/${selectedNote.id}`, {
+					newname: selectedNote.title,
+					newparent: selectedNote.father,
+					newcontent: selectedNote.content,
+					starred: !selectedNote.favorite,
+				});
+			} catch (error) {
+				console.error(error);
+				return;
+			}
+			selectedNote.favorite = !selectedNote.favorite;
 		},
 	},
 };

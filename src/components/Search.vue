@@ -42,10 +42,44 @@
 				<line x1="6" y1="6" x2="18" y2="18" />
 			</svg>
 		</div>
+		<div class="mb-3 flex flex-wrap">
+			<div class="flex px-3">
+				<input
+					type="checkbox"
+					id="filtro-preferiti"
+					class="border-none outline-none accent-quaternary"
+					v-model="favoriteFilter"
+				/>
+				<label for="filtro-preferiti" class="mx-1"
+					>Solo preferiti</label
+				>
+			</div>
+			<div class="flex px-3">
+				<input
+					type="checkbox"
+					id="filtro-recenti"
+					class="border-none outline-none accent-quaternary"
+					v-model="recentsFilter"
+				/>
+				<label for="filtro-recenti" class="mx-1"
+					>Modificate di recente</label
+				>
+			</div>
+		</div>
 		<div
 			v-for="result in results"
 			:key="result.id"
-			class="px-3 py-2 overflow-hidden whitespace-nowrap cursor-pointer"
+			class="
+				mx-2
+				my-1
+				px-1
+				py-1
+				rounded-md
+				overflow-hidden
+				whitespace-nowrap
+				cursor-pointer
+				hover:bg-primary hover:text-neutral
+			"
 			@click="changeOpen(result)"
 		>
 			<p>{{ result.title }}</p>
@@ -64,16 +98,42 @@ export default {
 			store: useFoldersStore(),
 			timeoutId: null,
 			results: [],
+			searchResults: [],
+			favoriteFilter: false,
+			recentsFilter: false,
 		};
+	},
+	watch: {
+		favoriteFilter(newValue, oldValue) {
+			this.results = this.applyFavoriteFilter(this.searchResults);
+		},
+		recentsFilter(newValue, oldValue) {
+			this.results = this.applyRecentsFilter(this.searchResults);
+		},
 	},
 	methods: {
 		search() {
 			let query = this.searchQuery;
-			this.results = this.store.fuse
-				.search({
-					$and: [{ title: query }, { type: "=note" }],
-				})
+			this.searchResults = this.store.fuse
+				.search(query)
 				.map((x) => x.item);
+			this.results = this.applyFavoriteFilter(this.searchResults);
+			this.results = this.applyRecentsFilter(this.results);
+		},
+		applyFavoriteFilter(results) {
+			let favoriteFilter = this.favoriteFilter;
+			return results.filter((x) =>
+				favoriteFilter ? x.favorite == true : true
+			);
+		},
+		applyRecentsFilter(results) {
+			let recentsFilter = this.recentsFilter;
+			let days = 5;
+			let date = new Date();
+			date.setDate(date.getDate() - days);
+			return results.filter((x) =>
+				recentsFilter ? x.updated > date : true
+			);
 		},
 		inputListener() {
 			if (this.timeoutId) clearTimeout(this.timeoutId);
