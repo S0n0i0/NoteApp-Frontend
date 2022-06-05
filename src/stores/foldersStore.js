@@ -36,7 +36,7 @@ export const useFoldersStore = defineStore('folders', {
             shareDialogMode: 'get', //get, import
             fuse: new Fuse([], {
                 threshold: 0.5,
-                keys: ['title', 'type'],
+                keys: ['title', 'type', 'favorite'],
                 useExtendedSearch: true,
             }),
         };
@@ -100,6 +100,8 @@ export const useFoldersStore = defineStore('folders', {
                     type: 'note',
                     content: JSON.parse(x.content),
                     shared: x.shared,
+                    favorite: x.starred,
+                    updated: new Date(x.updated),
                 })),
                 ...sharedNotes.map(x => ({
                     id: x._id,
@@ -108,6 +110,8 @@ export const useFoldersStore = defineStore('folders', {
                     type: 'note',
                     content: JSON.parse(x.content),
                     shared: x.shared,
+                    favorite: false,
+                    updated: new Date(x.updated),
                 }))
             ];
             for (let item of itemsList) {
@@ -199,6 +203,7 @@ export const useFoldersStore = defineStore('folders', {
                 obj.children = [];
             } else {
                 obj.saved = 2;
+                obj.favorite = false;
             }
             try {
                 let response = await http.post(type == 'folder' ? API_FOLDERS_URL : API_NOTES_URL, {
@@ -216,7 +221,7 @@ export const useFoldersStore = defineStore('folders', {
             this.itemsMap.get(this.rootFolderId).children.push(obj);
         },
         updateFuse() {
-            this.fuse.setCollection(this.items);
+            this.fuse.setCollection(this.items.filter(x => x.type == 'note'));
         }
     }
 });
