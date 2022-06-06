@@ -12,9 +12,10 @@
 </template>
 
 <script>
-import { QuillEditor, Delta } from "@vueup/vue-quill";
+import { QuillEditor, Delta, Quill } from "@vueup/vue-quill";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import { useFoldersStore } from "@/stores/foldersStore";
+import QuillCursors from "quill-cursors";
 
 export default {
 	name: "Editor",
@@ -80,8 +81,13 @@ export default {
 		deleteChanges() {
 			this.changes = new Delta();
 		},
+		getQuill() {
+			return this.$refs.editor.getQuill();
+		},
 	},
-	computed: {},
+	mounted() {
+		Quill.register("modules/cursors", QuillCursors);
+	},
 };
 </script>
 

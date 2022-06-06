@@ -16,11 +16,15 @@
     "pinia": "^2.0.14",
     "pinia-plugin-persistedstate": "^1.5.2",
     "postcss": "^8.4.13",
+    "quill-cursors": "^3.1.2",
     "quill-delta-to-markdown": "^0.6.0",
     "quill-to-pdf": "^1.0.7",
     "tailwindcss": "^3.0.24",
     "vue": "^3.2.13",
-    "vue-router": "^4.0.3"
+    "vue-router": "^4.0.3",
+    "y-quill": "^0.1.5",
+    "y-websocket": "^1.4.3",
+    "yjs": "^13.5.38"
   },
   "devDependencies": {
     "@vue/cli-plugin-router": "~5.0.0",

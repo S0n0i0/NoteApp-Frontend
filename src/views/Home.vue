@@ -330,6 +330,9 @@ import { useFoldersStore } from "@/stores/foldersStore";
 import { saveAs } from "file-saver";
 import { pdfExporter } from "quill-to-pdf";
 import { deltaToMarkdown } from "quill-delta-to-markdown";
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
+import { QuillBinding } from "y-quill";
 
 export default {
 	name: "Home",
@@ -371,6 +374,26 @@ export default {
 				},
 			},
 		};
+	},
+	computed: {
+		selectedNote() {
+			return this.store.selectedNote;
+		},
+	},
+	watch: {
+		async selectedNote(newValue, oldValue) {
+			if (
+				this.store.selectedNote.father == this.store.sharedFolderId ||
+				this.store.selectedNote.shared
+			) {
+				console.log("Crea nuova connessione websocket");
+				await this.joinWebsocket(
+					this.store.selectedNote.userId ||
+						useUserStore().decode()._id,
+					this.store.selectedNote.id
+				);
+			}
+		},
 	},
 	mounted() {
 		this.store.quillRef = this.$refs.editor;
@@ -564,6 +587,29 @@ export default {
 				return;
 			}
 			selectedNote.favorite = !selectedNote.favorite;
+		},
+		async joinWebsocket(userId, noteId) {
+			const ydoc = new Y.Doc();
+			let ROOMNAME = `${userId}:${noteId}`;
+			let URL = "ws://ws.noteapp-is2.tk:8020/";
+			const wsProvider = new WebsocketProvider(URL, ROOMNAME, ydoc, {
+				params: {
+					auth: useUserStore().authToken,
+				},
+			});
+			wsProvider.on("status", (event) => {
+				console.log(event.status); // logs "connected" or "disconnected"
+			});
+			const textOb = ydoc.getText("quill"); //mettere quill o data
+			const binding = new QuillBinding(
+				textOb,
+				this.$refs.editor.getQuill(),
+				wsProvider.awareness
+			);
+			textOb.observe((event) => {
+				// print updates when the data changes
+				console.log(textOb.toString());
+			});
 		},
 	},
 };

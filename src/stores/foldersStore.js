@@ -68,6 +68,9 @@ export const useFoldersStore = defineStore('folders', {
                     x => http.get(`${API_SHARED_NOTES}/share/${x.userid}/${x.noteid}`)
                 ));
                 sharedNotes = sharedNotes.filter(x => x.status != 'rejected').map(x => x.value.data);
+                let lookup = new Map();
+                sharedNotes.forEach(x => lookup.set(x._id, x));
+                shared.data.forEach(x => lookup.get(x.noteid).userId = x.userid);
             } catch (error) {
                 sharedNotes = [];
                 console.error(error);
@@ -112,6 +115,7 @@ export const useFoldersStore = defineStore('folders', {
                     shared: x.shared,
                     favorite: false,
                     updated: new Date(x.updated),
+                    userId: x.userId,
                 }))
             ];
             for (let item of itemsList) {
