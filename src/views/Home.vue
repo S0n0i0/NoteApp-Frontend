@@ -373,6 +373,7 @@ export default {
 					bounds: document.getElementById("editorContainer"),
 				},
 			},
+			provider: null,
 		};
 	},
 	computed: {
@@ -589,6 +590,10 @@ export default {
 			selectedNote.favorite = !selectedNote.favorite;
 		},
 		async joinWebsocket(userId, noteId) {
+			if (this.provider) {
+				this.provider.disconnect();
+				this.provider = null;
+			}
 			const ydoc = new Y.Doc();
 			let ROOMNAME = `${userId}:${noteId}`;
 			let URL = "ws://ws.noteapp-is2.tk:8020/";
@@ -597,6 +602,7 @@ export default {
 					auth: useUserStore().authToken,
 				},
 			});
+			this.provider = wsProvider;
 			wsProvider.on("status", (event) => {
 				console.log(event.status); // logs "connected" or "disconnected"
 			});
