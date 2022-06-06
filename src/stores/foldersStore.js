@@ -76,6 +76,7 @@ export const useFoldersStore = defineStore('folders', {
                 console.error(error);
                 return;
             }
+            console.log(sharedNotes);
             let sharedFolderId = this.sharedFolderId;
             let itemsList = [
                 {

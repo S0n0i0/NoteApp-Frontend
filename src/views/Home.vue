@@ -606,7 +606,7 @@ export default {
 			wsProvider.on("status", (event) => {
 				console.log(event.status); // logs "connected" or "disconnected"
 			});
-			const textOb = ydoc.getText("quill"); //mettere quill o data
+			const textOb = ydoc.getText("quill");
 			const binding = new QuillBinding(
 				textOb,
 				this.$refs.editor.getQuill(),
