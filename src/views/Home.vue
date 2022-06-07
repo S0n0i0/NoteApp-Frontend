@@ -132,6 +132,10 @@
 			@close="store.showShareDialog = false"
 		/>
 		<!-- start editor -->
+		<startpage
+			v-show="!store.selectedNote.id"
+			@search="activeBar = 'search'"
+		/>
 		<div
 			class="flex-1 flex-col"
 			:class="{
@@ -330,6 +334,7 @@ import Folders from "@/components/Folders.vue";
 import ShareDialog from "@/components/ShareDialog.vue";
 import ExportDialog from "@/components/ExportDialog.vue";
 import Search from "@/components/Search.vue";
+import Startpage from "@/components/Startpage.vue";
 import interact from "interactjs";
 import { useUserStore } from "@/stores/userStore";
 import { Delta } from "@vueup/vue-quill";
@@ -353,6 +358,7 @@ export default {
 		ExportDialog,
 		ShareDialog,
 		Search,
+		Startpage,
 	},
 	data() {
 		return {
@@ -426,6 +432,7 @@ export default {
 			this.$refs.toExport.setName(this.store.selectedNote.title);
 			this.toExport.show = true;
 		},
+		// save the changes of the note text
 		save(changes) {
 			//Send a save request to the database to save the note
 			if (!(changes instanceof Delta)) {
@@ -465,6 +472,7 @@ export default {
 					console.error("File non salvato");
 				});
 		},
+		// get a note from the server with the id
 		load(id) {
 			http.get(API_LOAD_URL + "/" + this.note.id)
 				.then((res) => {
@@ -493,11 +501,13 @@ export default {
 					console.error("File non caricato");
 				});
 		},
+		// clear any data saved in the browser and redirect to the login page
 		logout() {
 			localStorage.clear();
 			useUserStore().authToken = "";
 			this.$router.push({ name: "login" });
 		},
+		// save changes to the note title
 		async saveTitleChange() {
 			let target = this.store.selectedNote;
 			console.log(target);
@@ -513,6 +523,9 @@ export default {
 			}
 			this.store.updateFuse();
 		},
+		// detects click outside of the custom contextmenu
+		// so it can be closed
+		// also saves title changes
 		async outsideClick() {
 			this.store.closeMenu();
 			if (this.store.editingTarget) {
@@ -544,6 +557,7 @@ export default {
 			this.store.showShareDialog = true;
 			this.store.shareDialogMode = mode;
 		},
+		// convert the note to a file and download it
 		async exportNote(fileName) {
 			let fileBlob;
 			let content = this.$refs.editor.getContents();
@@ -557,6 +571,7 @@ export default {
 			saveAs(fileBlob, fileName.name + "." + fileName.type); //Downloads from the browser
 			this.toExport.show = false;
 		},
+		// change the favorite attribute of the select note
 		async changeFavoriteStatus() {
 			let selectedNote = this.store.selectedNote;
 			try {

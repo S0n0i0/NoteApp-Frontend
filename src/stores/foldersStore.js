@@ -127,7 +127,11 @@ export const useFoldersStore = defineStore('folders', {
             for (let [id, item] of this.itemsMap) {
                 if (item.father != null) {
                     let father = this.itemsMap.get(item.father);
-                    father.children.push(item);
+                    if (father) {
+                        father.children.push(item);
+                    } else {
+                        console.error(item);
+                    }
                 } else {
                     this.root.push(item);
                 }
@@ -183,6 +187,7 @@ export const useFoldersStore = defineStore('folders', {
                 father.children.indexOf(target),
                 1
             );
+            this.items.splice(this.items.indexOf(target), 1);
         },
         closeMenu() {
             this.contextMenu.show = false;
@@ -215,10 +220,11 @@ export const useFoldersStore = defineStore('folders', {
                 console.log(obj);
             } catch (error) {
                 console.error(error);
-                return;
+                return null;
             }
             this.items.push(obj);
             this.itemsMap.get(this.rootFolderId).children.push(obj);
+            return obj;
         },
         updateFuse() {
             this.fuse.setCollection(this.items.filter(x => x.type == 'note'));

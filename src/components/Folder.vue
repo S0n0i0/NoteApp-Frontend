@@ -108,6 +108,40 @@
 				<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 				<circle cx="12" cy="12" r="9" />
 			</svg>
+			<svg
+				v-if="item.type == 'note'"
+				v-show="item.favorite"
+				xmlns="http://www.w3.org/2000/svg"
+				width="14"
+				height="14"
+				viewBox="0 0 24 24"
+				stroke-width="0"
+				class="
+					fill-primary
+					min-w-[14px] min-h-[14px]
+					group-hover:fill-neutral
+					ml-2
+				"
+				:class="{
+					'group-hover:fill-primary fill-primary':
+						dragging ||
+						store.contextMenu.target == item ||
+						store.editingTarget == item,
+					'fill-neutral':
+						store.selectedNote == item &&
+						!(
+							store.contextMenu.target == item ||
+							store.editingTarget == item
+						),
+				}"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+				<path
+					d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"
+				/>
+			</svg>
 		</div>
 		<div v-show="open || (item.id == store.rootFolderId && store.openRoot)">
 			<folder
@@ -138,6 +172,8 @@ export default {
 		};
 	},
 	methods: {
+		// if you click a folder you "open" it
+		// if you click a note you select and open it
 		changeOpen() {
 			if (this.item.type == "folder") {
 				this.open = !this.open;
@@ -157,6 +193,7 @@ export default {
 			this.dragging = false;
 			this.store.draggedElement = null;
 		},
+		// highlight the drop location if it is a folder and you enter on it while dragging
 		dragEnterEvent() {
 			if (this.item.type == "folder") {
 				//console.log("enter" + this.item.title);
@@ -181,12 +218,14 @@ export default {
 				this.dragenter = false;
 			}
 		},
+		// move the dragged element to the drop location
 		dropEvent() {
 			if (this.item.type == "folder") {
 				this.dragenter = false;
 				this.store.move(this.store.draggedElement, this.item);
 			}
 		},
+		// open the custom contextmenu
 		menuEvent(event) {
 			if (this.item.id == this.store.rootFolderId) return;
 			if (this.item.id == this.store.sharedFolderId) return;
@@ -198,6 +237,7 @@ export default {
 			menu.target = this.item;
 			this.store.editingTargetElement = this.$refs.input;
 		},
+		// save the changes to the title when you type "enter"
 		async enterListener(event) {
 			if (event.key == "Enter") {
 				let target = this.store.editingTarget;
