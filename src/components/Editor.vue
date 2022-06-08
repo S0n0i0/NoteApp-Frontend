@@ -90,7 +90,7 @@ export default {
 					temp.deleteChanges();
 				}, 2000);
 			} else {
-				if (this.store.selectedNote.saved != 0)
+				if (this.store.selectedNote.saved != 0 && !this.store.firstTime)
 					this.store.selectedNote.saved--;
 			}
 			if (

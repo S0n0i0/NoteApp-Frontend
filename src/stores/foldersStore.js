@@ -251,7 +251,6 @@ export const useFoldersStore = defineStore('folders', {
                 await this.ydoc.destroy();
                 this.provider = null;
                 this.ydoc = null;
-                this.firstTime = true;
             }
             if (
                 newNote.father ==
@@ -284,26 +283,31 @@ export const useFoldersStore = defineStore('folders', {
             this.provider = wsProvider;
             wsProvider.on("status", (event) => {
                 console.log(event.status); // logs "connected" or "disconnected"
-                if (event.status == 'connected') {
-                    console.log(textOb.toString());
-                }
             });
-            const textOb = ydoc.getText(`${noteId}`);
+            const textOb = ydoc.getText(`${noteId}-4`);
             this.textOb = textOb;
+            let firstTime = this.firstTime;
+            setTimeout(this.timeOutconnection, 500); // metodo non stabile per reti lente o note troppo grandi
             textOb.observe((event) => {
                 // print updates when the data changes
-                console.log(textOb.toString());
-                this.selectedNote.content = textOb.toDelta();
-                if (!this.firstTime) {
+                if (event.transaction.origin != null) {
+                    console.log(textOb.toString());
+                    this.selectedNote.content = textOb.toDelta();
                     this.quillRef.setContents(this.selectedNote.content);
                 }
             });
         },
+        timeOutconnection() {
+            this.firstTime = false;
+            if (this.textOb.toString() == '') {
+                console.log('OK');
+                this.textOb.applyDelta(this.selectedNote.content.ops);
+                return;
+            }
+        },
         sendUpdate(change) {
             console.log(change);
-            if (this.firstTime) {
-                this.firstTime = false;
-            } else {
+            if (change.source == 'user') {
                 this.textOb.applyDelta(change.delta.ops);
             }
         },

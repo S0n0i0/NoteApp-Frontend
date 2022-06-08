@@ -413,18 +413,18 @@ export default {
 			this.$refs.toExport.setName(this.store.selectedNote.title);
 			this.toExport.show = true;
 		},
-		save(changes) {
+		async save(changes) {
+			//Send a save request to the database to save the note
+			if (!(changes instanceof Delta)) {
+				changes = this.$refs.editor.getChanges();
+				this.$refs.editor.deleteChanges();
+				console.log("Salvataggio manuale");
+			} else {
+				console.log("Salvataggio automatico");
+			}
+			let target = this.store.selectedNote;
 			// Not a shared note
 			if (this.store.selectedNote.father != this.store.sharedFolderId) {
-				//Send a save request to the database to save the note
-				if (!(changes instanceof Delta)) {
-					changes = this.$refs.editor.getChanges();
-					this.$refs.editor.deleteChanges();
-					console.log("Salvataggio manuale");
-				} else {
-					console.log("Salvataggio automatico");
-				}
-				let target = this.store.selectedNote;
 				target.saved = true;
 				http.put(API_SAVE_URL + "/" + target.id, {
 					newfather: target.title,
@@ -455,7 +455,32 @@ export default {
 					});
 			} else {
 				// Shared note saving
-				console.log("Shared note saved");
+				try {
+					await http.put(
+						`${API_SAVE_URL}/${target.userId}/${target.id}`,
+						{
+							newcontent: changes.ops,
+						}
+					);
+				} catch (err) {
+					if (err.status == 400) {
+						console.error("Input invalido");
+					} else if (err.status == 403) {
+						console.error("Utente non autenticato");
+						this.$router.push("/login");
+					} else if (err.status == 500) {
+						console.error("Errore del server");
+					} else {
+						console.error(
+							"Errore generico: ",
+							err.status,
+							"-",
+							err.code
+						);
+					}
+					this.showError("Errore: File non salvato");
+					console.error("File non salvato");
+				}
 			}
 		},
 		load(id) {
