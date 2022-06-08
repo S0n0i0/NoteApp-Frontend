@@ -415,12 +415,11 @@ export default {
 			this.editor.autoSaving = false;
 		},
 		showExport() {
-			console.log(this.$refs.toExport);
 			this.$refs.toExport.setName(this.store.selectedNote.title);
 			this.toExport.show = true;
 		},
 		// save the changes of the note text
-		save(changes) {
+		async save(changes) {
 			//Send a save request to the database to save the note
 			if (!(changes instanceof Delta)) {
 				changes = this.$refs.editor.getChanges();
@@ -528,7 +527,6 @@ export default {
 		// save changes to the note title
 		async saveTitleChange() {
 			let target = this.store.selectedNote;
-			console.log(target);
 			let data = {
 				newname: target.title,
 				newparent: target.father,
