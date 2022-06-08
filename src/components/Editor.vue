@@ -7,7 +7,7 @@
 		:content="content"
 		:readOnly="readOnly"
 		:options="options"
-		v-model:content="vmodelVar"
+		v-model:content="store.selectedNote.content"
 	/>
 </template>
 
@@ -37,7 +37,6 @@ export default {
 			default: false,
 		},
 		options: Object,
-		emptyVar: "",
 	},
 	emits: ["autoSave"],
 	data() {
@@ -45,6 +44,7 @@ export default {
 			changes: new Delta(),
 			timer: null,
 			store: useFoldersStore(),
+			emptyVar: "",
 		};
 	},
 	computed: {
@@ -93,6 +93,11 @@ export default {
 				if (this.store.selectedNote.saved != 0)
 					this.store.selectedNote.saved--;
 			}
+			if (
+				this.store.selectedNote.father == this.store.sharedFolderId ||
+				this.store.selectedNote.shared
+			)
+				this.store.sendUpdate(change);
 		},
 		getContents() {
 			return this.$refs.editor.getContents();

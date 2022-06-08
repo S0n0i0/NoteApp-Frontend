@@ -330,9 +330,6 @@ import { useFoldersStore } from "@/stores/foldersStore";
 import { saveAs } from "file-saver";
 import { pdfExporter } from "quill-to-pdf";
 import { deltaToMarkdown } from "quill-delta-to-markdown";
-import * as Y from "yjs";
-import { WebsocketProvider } from "y-websocket";
-import { QuillBinding } from "y-quill";
 
 export default {
 	name: "Home",
@@ -373,35 +370,7 @@ export default {
 					bounds: document.getElementById("editorContainer"),
 				},
 			},
-			provider: null,
-			binding: null,
 		};
-	},
-	computed: {
-		selectedNote() {
-			return this.store.selectedNote;
-		},
-	},
-	watch: {
-		async selectedNote(newValue, oldValue) {
-			if (this.provider || this.binding) {
-				await this.provider.destroy();
-				await this.binding.destroy();
-				this.provider = null;
-				this.binding = null;
-			}
-			if (
-				this.store.selectedNote.father == this.store.sharedFolderId ||
-				this.store.selectedNote.shared
-			) {
-				console.log("Crea nuova connessione websocket");
-				await this.joinWebsocket(
-					this.store.selectedNote.userId ||
-						useUserStore().decode()._id,
-					this.store.selectedNote.id
-				);
-			}
-		},
 	},
 	mounted() {
 		this.store.quillRef = this.$refs.editor;
@@ -595,36 +564,6 @@ export default {
 				return;
 			}
 			selectedNote.favorite = !selectedNote.favorite;
-		},
-		// create the ydoc object and connect to the server using websockets
-		// then bind ydoc to the editor
-		async joinWebsocket(userId, noteId) {
-			const ydoc = new Y.Doc();
-			let ROOMNAME = `${userId}:${noteId}`;
-			let URL = "wss://api.noteapp-is2.tk/ws";
-			const wsProvider = new WebsocketProvider(URL, ROOMNAME, ydoc, {
-				params: {
-					auth: useUserStore().authToken,
-				},
-			});
-			this.provider = wsProvider;
-			wsProvider.on("status", (event) => {
-				console.log(event.status); // logs "connected" or "disconnected"
-			});
-			const textOb = ydoc.getText(`${noteId}`);
-			if (textOb.toString() == "") {
-				//textOb.applyDelta(this.store.itemsMap.get(noteId).content.ops);
-			}
-			const binding = new QuillBinding(
-				textOb,
-				this.$refs.editor.getQuill(),
-				wsProvider.awareness
-			);
-			this.binding = binding;
-			textOb.observe((event) => {
-				// print updates when the data changes
-				console.log(textOb.toString());
-			});
 		},
 	},
 };
