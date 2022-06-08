@@ -174,7 +174,7 @@ export default {
 	methods: {
 		// if you click a folder you "open" it
 		// if you click a note you select and open it
-		changeOpen() {
+		async changeOpen() {
 			if (this.item.type == "folder") {
 				this.open = !this.open;
 				this.store.openRoot = false;
@@ -194,7 +194,6 @@ export default {
 		// highlight the drop location if it is a folder and you enter on it while dragging
 		dragEnterEvent() {
 			if (this.item.type == "folder") {
-				//console.log("enter" + this.item.title);
 				let [target, destination] = [
 					this.store.draggedElement,
 					this.item,
@@ -212,7 +211,6 @@ export default {
 		},
 		dragLeaveEvent() {
 			if (this.item.type == "folder") {
-				//console.log("leave" + this.item.title);
 				this.dragenter = false;
 			}
 		},

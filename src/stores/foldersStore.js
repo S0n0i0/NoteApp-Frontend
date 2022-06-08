@@ -141,7 +141,6 @@ export const useFoldersStore = defineStore('folders', {
                     item.saved = 2;
                 }
             }
-            //console.log(itemsList);
             this.items = itemsList;
             this.root.length = 0;
             for (let [id, item] of this.itemsMap) {
@@ -157,7 +156,6 @@ export const useFoldersStore = defineStore('folders', {
                 }
             }
             this.updateFuse();
-            console.log(this.items);
         },
         async move(target, destination) {
             if (target == destination) return;
@@ -238,7 +236,6 @@ export const useFoldersStore = defineStore('folders', {
                 });
                 obj.id = response.data._id;
                 obj.content = response.data.content;
-                console.log(obj);
             } catch (error) {
                 console.error(error);
                 return null;
@@ -251,7 +248,6 @@ export const useFoldersStore = defineStore('folders', {
             this.fuse.setCollection(this.items.filter(x => x.type == 'note'));
         },
         async changeSelectedNote(newNote) {
-            console.log(newNote.title);
             if (this.provider || this.ydoc) {
                 await this.provider.destroy();
                 await this.ydoc.destroy();
@@ -263,7 +259,6 @@ export const useFoldersStore = defineStore('folders', {
                 this.sharedFolderId ||
                 newNote.shared
             ) {
-                console.log("Crea nuova connessione websocket");
                 await this.joinWebsocket(
                     newNote.userId ||
                     useUserStore().decode()._id,
@@ -290,14 +285,13 @@ export const useFoldersStore = defineStore('folders', {
             wsProvider.on("status", (event) => {
                 console.log(event.status); // logs "connected" or "disconnected"
             });
-            const textOb = ydoc.getText(`${noteId}-4`);
+            const textOb = ydoc.getText(`${noteId}`);
             this.textOb = textOb;
             let firstTime = this.firstTime;
             setTimeout(this.timeOutconnection, 500); // metodo non stabile per reti lente o note troppo grandi
             textOb.observe((event) => {
                 // print updates when the data changes
                 if (event.transaction.origin != null) {
-                    console.log(textOb.toString());
                     this.selectedNote.content = textOb.toDelta();
                     this.quillRef.setContents(this.selectedNote.content);
                 }
@@ -306,13 +300,11 @@ export const useFoldersStore = defineStore('folders', {
         timeOutconnection() {
             this.firstTime = false;
             if (this.textOb.toString() == '') {
-                console.log('OK');
                 this.textOb.applyDelta(this.selectedNote.content.ops);
                 return;
             }
         },
         sendUpdate(change) {
-            console.log(change);
             if (change.source == 'user') {
                 this.textOb.applyDelta(change.delta.ops);
             }
