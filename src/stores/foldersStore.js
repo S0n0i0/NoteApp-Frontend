@@ -2,6 +2,18 @@ import { defineStore } from 'pinia';
 import http from "@/assets/scripts/axios-config";
 import Fuse from "fuse.js";
 import { API_NOTES_URL, API_FOLDERS_URL, API_SHARED_NOTES } from "../../config";
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
+import { QuillBinding } from "y-quill";
+import { useUserStore } from "@/stores/userStore";
+
+function createCustomTimeout(ms) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve();
+        }, ms);
+    });
+}
 
 export const useFoldersStore = defineStore('folders', {
     state: () => {
@@ -39,6 +51,10 @@ export const useFoldersStore = defineStore('folders', {
                 keys: ['title', 'type', 'favorite'],
                 useExtendedSearch: true,
             }),
+            provider: null,
+            ydoc: null,
+            textOb: null,
+            firstTime: true,
         };
     },
     getters: {
@@ -68,6 +84,9 @@ export const useFoldersStore = defineStore('folders', {
                     x => http.get(`${API_SHARED_NOTES}/share/${x.userid}/${x.noteid}`)
                 ));
                 sharedNotes = sharedNotes.filter(x => x.status != 'rejected').map(x => x.value.data);
+                let lookup = new Map();
+                sharedNotes.forEach(x => lookup.set(x._id, x));
+                shared.data.forEach(x => lookup.get(x.noteid).userId = x.userid);
             } catch (error) {
                 sharedNotes = [];
                 console.error(error);
@@ -112,6 +131,7 @@ export const useFoldersStore = defineStore('folders', {
                     shared: x.shared,
                     favorite: false,
                     updated: new Date(x.updated),
+                    userId: x.userId,
                 }))
             ];
             for (let item of itemsList) {
@@ -137,6 +157,7 @@ export const useFoldersStore = defineStore('folders', {
                 }
             }
             this.updateFuse();
+            console.log(this.items);
         },
         async move(target, destination) {
             if (target == destination) return;
@@ -228,6 +249,73 @@ export const useFoldersStore = defineStore('folders', {
         },
         updateFuse() {
             this.fuse.setCollection(this.items.filter(x => x.type == 'note'));
-        }
+        },
+        async changeSelectedNote(newNote) {
+            console.log(newNote.title);
+            if (this.provider || this.ydoc) {
+                await this.provider.destroy();
+                await this.ydoc.destroy();
+                this.provider = null;
+                this.ydoc = null;
+            }
+            if (
+                newNote.father ==
+                this.sharedFolderId ||
+                newNote.shared
+            ) {
+                console.log("Crea nuova connessione websocket");
+                await this.joinWebsocket(
+                    newNote.userId ||
+                    useUserStore().decode()._id,
+                    newNote.id
+                );
+            }
+            if (newNote.saved != 0) newNote.saved = 2;
+            this.selectedNote = newNote;
+            this.quillRef.setContents(newNote.content);
+        },
+        // create the ydoc object and connect to the server using websockets
+        // then bind ydoc to the editor
+        async joinWebsocket(userId, noteId) {
+            const ydoc = new Y.Doc();
+            this.ydoc = ydoc;
+            let ROOMNAME = `${userId}:${noteId}`;
+            let URL = "wss://api.noteapp-is2.tk/ws";
+            const wsProvider = new WebsocketProvider(URL, ROOMNAME, ydoc, {
+                params: {
+                    auth: useUserStore().authToken,
+                },
+            });
+            this.provider = wsProvider;
+            wsProvider.on("status", (event) => {
+                console.log(event.status); // logs "connected" or "disconnected"
+            });
+            const textOb = ydoc.getText(`${noteId}-4`);
+            this.textOb = textOb;
+            let firstTime = this.firstTime;
+            setTimeout(this.timeOutconnection, 500); // metodo non stabile per reti lente o note troppo grandi
+            textOb.observe((event) => {
+                // print updates when the data changes
+                if (event.transaction.origin != null) {
+                    console.log(textOb.toString());
+                    this.selectedNote.content = textOb.toDelta();
+                    this.quillRef.setContents(this.selectedNote.content);
+                }
+            });
+        },
+        timeOutconnection() {
+            this.firstTime = false;
+            if (this.textOb.toString() == '') {
+                console.log('OK');
+                this.textOb.applyDelta(this.selectedNote.content.ops);
+                return;
+            }
+        },
+        sendUpdate(change) {
+            console.log(change);
+            if (change.source == 'user') {
+                this.textOb.applyDelta(change.delta.ops);
+            }
+        },
     }
 });

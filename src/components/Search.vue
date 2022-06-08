@@ -139,10 +139,8 @@ export default {
 			if (this.timeoutId) clearTimeout(this.timeoutId);
 			this.timeoutId = setTimeout(this.search, 500);
 		},
-		changeOpen(item) {
-			if (item.saved != 0) item.saved = 2;
-			this.store.selectedNote = item;
-			this.store.quillRef.setContents(item.content);
+		async changeOpen(item) {
+			await this.store.changeSelectedNote(item);
 		},
 	},
 };

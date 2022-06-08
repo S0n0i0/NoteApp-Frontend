@@ -179,9 +179,7 @@ export default {
 				this.open = !this.open;
 				this.store.openRoot = false;
 			} else {
-				if (this.item.saved != 0) this.item.saved = 2;
-				this.store.selectedNote = this.item;
-				this.store.quillRef.setContents(this.item.content);
+				await this.store.changeSelectedNote(this.item);
 			}
 		},
 		dragStartEvent() {

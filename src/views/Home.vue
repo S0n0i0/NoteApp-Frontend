@@ -154,13 +154,7 @@
 					v-model="store.selectedNote.title"
 					@blur="saveTitleChange"
 				/>
-				<div
-					:class="{
-						flex: store.selectedNote.father != store.sharedFolderId,
-						hidden:
-							store.selectedNote.father == store.sharedFolderId,
-					}"
-				>
+				<div class="flex">
 					<label class="text-neutral text-1s mt-1"
 						>Salvataggio automatico</label
 					>
@@ -199,7 +193,6 @@
 					<line x1="8.7" y1="13.3" x2="15.3" y2="16.7" />
 				</svg>
 				<svg
-					v-show="store.selectedNote.father != store.sharedFolderId"
 					xmlns="http://www.w3.org/2000/svg"
 					class="
 						stroke-neutral
@@ -293,13 +286,7 @@
 				</svg>
 			</div>
 			<!-- end titlebar -->
-			<div
-				class="editor-container flex flex-col"
-				:class="{
-					'pointer-events-none':
-						store.selectedNote.father == store.sharedFolderId,
-				}"
-			>
+			<div class="editor-container flex flex-col">
 				<editor
 					ref="editor"
 					@autoSave="save"
@@ -443,16 +430,46 @@ export default {
 				console.log("Salvataggio automatico");
 			}
 			let target = this.store.selectedNote;
-			target.saved = true;
-			http.put(API_SAVE_URL + "/" + target.id, {
-				newfather: target.title,
-				newcontent: changes.ops,
-				newname: target.title,
-			})
-				.then((response) => {
-					console.log("File salvato");
+			// Not a shared note
+			if (this.store.selectedNote.father != this.store.sharedFolderId) {
+				target.saved = true;
+				http.put(API_SAVE_URL + "/" + target.id, {
+					newfather: target.title,
+					newcontent: changes.ops,
+					newname: target.title,
 				})
-				.catch((err) => {
+					.then((response) => {
+						console.log("File salvato");
+					})
+					.catch((err) => {
+						if (err.status == 400) {
+							console.error("Input invalido");
+						} else if (err.status == 403) {
+							console.error("Utente non autenticato");
+							this.$router.push("/login");
+						} else if (err.status == 500) {
+							console.error("Errore del server");
+						} else {
+							console.error(
+								"Errore generico: ",
+								err.status,
+								"-",
+								err.code
+							);
+						}
+						this.showError("Errore: File non salvato");
+						console.error("File non salvato");
+					});
+			} else {
+				// Shared note saving
+				try {
+					await http.put(
+						`${API_SAVE_URL}/${target.userId}/${target.id}`,
+						{
+							newcontent: changes.ops,
+						}
+					);
+				} catch (err) {
 					if (err.status == 400) {
 						console.error("Input invalido");
 					} else if (err.status == 403) {
@@ -470,7 +487,8 @@ export default {
 					}
 					this.showError("Errore: File non salvato");
 					console.error("File non salvato");
-				});
+				}
+			}
 		},
 		// get a note from the server with the id
 		load(id) {

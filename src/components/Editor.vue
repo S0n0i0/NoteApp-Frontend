@@ -12,9 +12,10 @@
 </template>
 
 <script>
-import { QuillEditor, Delta } from "@vueup/vue-quill";
+import { QuillEditor, Delta, Quill } from "@vueup/vue-quill";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import { useFoldersStore } from "@/stores/foldersStore";
+import QuillCursors from "quill-cursors";
 
 export default {
 	name: "Editor",
@@ -43,7 +44,32 @@ export default {
 			changes: new Delta(),
 			timer: null,
 			store: useFoldersStore(),
+			emptyVar: "",
 		};
+	},
+	computed: {
+		vmodelVar: {
+			get() {
+				if (this.isShared) {
+					return this.emptyVar;
+				} else {
+					return this.store.selectedNote.content;
+				}
+			},
+			set(value) {
+				if (this.isShared) {
+					this.emptyVar = value;
+				} else {
+					this.store.selectedNote.content = value;
+				}
+			},
+		},
+		isShared() {
+			return (
+				this.store.selectedNote.father == this.store.sharedFolderId ||
+				this.store.selectedNote.shared
+			);
+		},
 	},
 	methods: {
 		accumulate: function (change) {
@@ -64,9 +90,14 @@ export default {
 					temp.deleteChanges();
 				}, 2000);
 			} else {
-				if (this.store.selectedNote.saved != 0)
+				if (this.store.selectedNote.saved != 0 && !this.store.firstTime)
 					this.store.selectedNote.saved--;
 			}
+			if (
+				this.store.selectedNote.father == this.store.sharedFolderId ||
+				this.store.selectedNote.shared
+			)
+				this.store.sendUpdate(change);
 		},
 		getContents() {
 			return this.$refs.editor.getContents();
@@ -80,8 +111,13 @@ export default {
 		deleteChanges() {
 			this.changes = new Delta();
 		},
+		getQuill() {
+			return this.$refs.editor.getQuill();
+		},
 	},
-	computed: {},
+	mounted() {
+		Quill.register("modules/cursors", QuillCursors);
+	},
 };
 </script>
 
